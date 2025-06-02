@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Souyette Card Game Pocket</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f0f0f0;
+    }
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      position: relative;
+    }
+    #logout-btn {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      background: #c0392b;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      background: #ecf0f1;
+      padding: 0.5rem;
+    }
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      margin: 0 0.5rem;
+      border: none;
+      border-radius: 5px;
+      background: #bdc3c7;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #3498db;
+      color: white;
+    }
+    main {
+      padding: 1rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    .booster-btn {
+      background: #e67e22;
+      color: white;
+      border: none;
+      padding: 1rem;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      margin: 0.5rem 0;
+      cursor: pointer;
+      width: 100%;
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .card {
+      width: 100px;
+      height: 140px;
+      border-radius: 10px;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer; /* pour montrer que c’est cliquable */
+      transition: transform 0.3s ease;
+    }
+    .count-badge {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      pointer-events: none; /* pour que le clic passe à la carte */
+    }
+    .section {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    #login {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    #login input {
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      width: 150px;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    #login button {
+      font-size: 1.1rem;
+      padding: 0.5rem 1rem;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    Souyette Card Game Pocket
+    <button id="logout-btn" onclick="logout()">Déconnexion</button>
+  </header>
+
+  <div id="login" class="section visible">
+    <h2>Entrez votre code à 6 chiffres</h2>
+    <input type="text" id="codeInput" maxlength="6" placeholder="Ex: 123456" />
+    <button onclick="login()">Connexion</button>
+  </div>
+
+  <div id="app" style="display: none;">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('booster')">Booster</button>
+      <button class="tab-btn" onclick="switchTab('collection')">Collection</button>
+    </div>
+
+    <main>
+      <section id="booster" class="section visible">
+        <p>Boosters restants aujourd'hui : <span id="booster-count">5</span></p>
+        <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
+        <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
+        <div id="booster-result" class="card-container"></div>
+      </section>
+
+      <section id="collection" class="section">
+        <h3>Votre Collection</h3>
+        <div id="collection-cards" class="card-container"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const cardsPerBooster = 3;
+    const dailyLimit = 5;
+    const today = new Date().toDateString();
+    let currentCode = "";
+
+    // Remplacez ici par vos propres valeurs GitHub :
+    const utilisateur = "ton-utilisateur";
+    const depot = "ton-depot";
+    const branche = "main"; // ou master
+
+    const extensions = {
+  "OG": [...Array(95)].map((_, i) =>
+    `images/OG/${String(i + 1).padStart(3, '0')}.jpg`
+  ),
+  "PR": [...Array(95)].map((_, i) =>
+    `images/PR/${String(i + 1).padStart(3, '0')}.jpg`
+  )
+};
+
+    function getStorageKey() {
+      return `cardData_user_${currentCode}`;
+    }
+
+    function getData() {
+      let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
+      if (data.date !== today) {
+        data.date = today;
+        data.remaining = dailyLimit;
+      }
+      data.collection = data.collection || [];
+      localStorage.setItem(getStorageKey(), JSON.stringify(data));
+      return data;
+    }
+
+    function saveData(data) {
+      localStorage.setItem(getStorageKey(), JSON.stringify(data));
+    }
+
+    function updateBoosterCount() {
+      const data = getData();
+      document.getElementById("booster-count").textContent = data.remaining;
+    }
+
+    function openBooster(extension) {
+      const data = getData();
+      if (data.remaining <= 0) {
+        alert("Vous avez atteint la limite de boosters pour aujourd'hui !");
+        return;
+      }
+
+      const resultContainer = document.getElementById("booster-result");
+      resultContainer.innerHTML = "";
+
+      const pool = extensions[extension];
+      const newCards = [];
+
+      for (let i = 0; i < cardsPerBooster; i++) {
+        const image = pool[Math.floor(Math.random() * pool.length)];
+        const existing = data.collection.find(c => c.image === image && c.extension === extension);
+        if (existing) {
+          existing.count = (existing.count || 1) + 1;
+        } else {
+          data.collection.push({ image, extension, count: 1 });
+        }
+        newCards.push({ image, extension });
+      }
+
+      data.remaining--;
+      saveData(data);
+      updateBoosterCount();
+
+      newCards.forEach(card => {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.style.backgroundImage = `url(${card.image})`;
+        resultContainer.appendChild(el);
+      });
+
+      updateCollection();
+    }
+
+    function updateCollection() {
+      const data = getData();
+      const container = document.getElementById("collection-cards");
+      container.innerHTML = "";
+
+      if (data.collection.length === 0) {
+        container.innerHTML = "<p>Vous n'avez encore aucune carte.</p>";
+        return;
+      }
+
+      data.collection.forEach(card => {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.style.backgroundImage = `url(${card.image})`;
+
+        if (card.count > 1) {
+          const badge = document.createElement("div");
+          badge.className = "count-badge";
+          badge.textContent = `x${card.count}`;
+          el.appendChild(badge);
+        }
+
+        // Ajout du gestionnaire de clic pour agrandir/réduire
+        el.addEventListener("click", () => {
+          if (el.style.transform === "scale(2)") {
+            el.style.transform = "";
+            el.style.zIndex = "";
+          } else {
+            el.style.transform = "scale(2)";
+            el.style.zIndex = "10"; // pour être au-dessus des autres cartes
+          }
+        });
+
+        container.appendChild(el);
+      });
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("visible"));
+      document.querySelector(`#${tab}`).classList.add("visible");
+
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        if (btn.textContent.toLowerCase().includes(tab)) {
+          btn.classList.add("active");
+        }
+      });
+
+      if (tab === "collection") updateCollection();
+    }
+
+    function login() {
+      const code = document.getElementById("codeInput").value.trim();
+      if (!/^\d{6}$/.test(code)) {
+        alert("Veuillez entrer un code à 6 chiffres valide.");
+        return;
+      }
+      currentCode = code;
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      document.getElementById("logout-btn").style.display = "inline-block";
+      updateBoosterCount();
+      updateCollection();
+    }
+
+    function logout() {
+      currentCode = "";
+      document.getElementById("login").style.display = "flex";
+      document.getElementById("app").style.display = "none";
+      document.getElementById("logout-btn").style.display = "none";
+      document.getElementById("codeInput").value = "";
+    }
+  </script>
+</body>
+</html>
