@@ -51,7 +51,7 @@
     }
     main {
       padding: 1rem;
-      max-width: 600px;
+      max-width: 800px;
       margin: auto;
     }
     .booster-btn {
@@ -76,16 +76,15 @@
       width: 100px;
       height: 140px;
       border-radius: 10px;
-      position: relative;
       background-size: cover;
       background-position: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transition: transform 0.2s ease;
       cursor: pointer;
+      transition: transform 0.2s;
     }
-    .card.expanded {
-      transform: scale(2);
-      z-index: 1000;
+    .card.enlarged {
+      transform: scale(3);
+      z-index: 10;
     }
     .count-badge {
       position: absolute;
@@ -148,7 +147,7 @@
     <main>
       <section id="booster" class="section visible">
         <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
-        <p id="reset-timer" style="font-size: 0.9rem; color: #555;"></p>
+        <div id="booster-timer"></div>
         <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
         <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
         <div id="booster-result" class="card-container"></div>
@@ -156,7 +155,7 @@
 
       <section id="collection" class="section">
         <h3>Votre Collection</h3>
-        <div id="collection-cards" class="card-container"></div>
+        <div id="collection-cards"></div>
       </section>
     </main>
   </div>
@@ -164,17 +163,13 @@
   <script>
     const cardsPerBooster = 3;
     const dailyLimit = 3;
-    const extensions = {
-      "OG": [...Array(125)].map((_, i) =>
-        `images/OG/${String(i + 1).padStart(3, '0')}.jpg`
-      ),
-      "PR": [...Array(65)].map((_, i) =>
-        `images/PR/${String(i + 1).padStart(3, '0')}.jpg`
-      )
-    };
-
+    const today = new Date().toDateString();
     let currentCode = "";
-    let currentDate = new Date().toDateString();
+
+    const extensions = {
+      "OG": [...Array(125)].map((_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
+      "PR": [...Array(65)].map((_, i) => `images/PR/${String(i + 1).padStart(3, '0')}.jpg`)
+    };
 
     function getStorageKey() {
       return `cardData_user_${currentCode}`;
@@ -182,9 +177,10 @@
 
     function getData() {
       let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
-      if (data.date !== currentDate) {
-        data.date = currentDate;
+      if (data.date !== today) {
+        data.date = today;
         data.remaining = dailyLimit;
+        data.resetTime = new Date().setHours(24, 0, 0, 0);
       }
       data.collection = data.collection || [];
       localStorage.setItem(getStorageKey(), JSON.stringify(data));
@@ -198,6 +194,23 @@
     function updateBoosterCount() {
       const data = getData();
       document.getElementById("booster-count").textContent = data.remaining;
+      updateTimer(data);
+    }
+
+    function updateTimer(data) {
+      const timerEl = document.getElementById("booster-timer");
+      const interval = setInterval(() => {
+        const remaining = data.resetTime - new Date().getTime();
+        if (remaining <= 0) {
+          clearInterval(interval);
+          timerEl.textContent = "Nouveaux boosters disponibles !";
+        } else {
+          const h = Math.floor(remaining / 3600000);
+          const m = Math.floor((remaining % 3600000) / 60000);
+          const s = Math.floor((remaining % 60000) / 1000);
+          timerEl.textContent = `Prochain reset dans : ${h}h ${m}m ${s}s`;
+        }
+      }, 1000);
     }
 
     function openBooster(extension) {
@@ -232,7 +245,6 @@
         const el = document.createElement("div");
         el.className = "card";
         el.style.backgroundImage = `url(${card.image})`;
-        el.addEventListener("click", toggleCardSize);
         resultContainer.appendChild(el);
       });
 
@@ -249,25 +261,48 @@
         return;
       }
 
+      const grouped = {};
       data.collection.forEach(card => {
-        const el = document.createElement("div");
-        el.className = "card";
-        el.style.backgroundImage = `url(${card.image})`;
-        el.addEventListener("click", toggleCardSize);
-
-        if (card.count > 1) {
-          const badge = document.createElement("div");
-          badge.className = "count-badge";
-          badge.textContent = `x${card.count}`;
-          el.appendChild(badge);
-        }
-
-        container.appendChild(el);
+        if (!grouped[card.extension]) grouped[card.extension] = [];
+        grouped[card.extension].push(card);
       });
+
+      for (const ext of Object.keys(grouped).sort()) {
+        const title = document.createElement("h4");
+        title.textContent = `Extension ${ext}`;
+        container.appendChild(title);
+
+        const groupWrapper = document.createElement("div");
+        groupWrapper.className = "card-container";
+
+        grouped[ext].sort((a, b) => {
+          const numA = parseInt(a.image.match(/(\d+)\.jpg/)[1]);
+          const numB = parseInt(b.image.match(/(\d+)\.jpg/)[1]);
+          return numA - numB;
+        });
+
+        grouped[ext].forEach(card => {
+          const el = document.createElement("div");
+          el.className = "card";
+          el.style.backgroundImage = `url(${card.image})`;
+          el.addEventListener("click", toggleCardSize);
+
+          if (card.count > 1) {
+            const badge = document.createElement("div");
+            badge.className = "count-badge";
+            badge.textContent = `x${card.count}`;
+            el.appendChild(badge);
+          }
+
+          groupWrapper.appendChild(el);
+        });
+
+        container.appendChild(groupWrapper);
+      }
     }
 
     function toggleCardSize(e) {
-      e.currentTarget.classList.toggle("expanded");
+      e.currentTarget.classList.toggle("enlarged");
     }
 
     function switchTab(tab) {
@@ -291,15 +326,11 @@
         return;
       }
       currentCode = code;
-      currentDate = new Date().toDateString();
       document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
       document.getElementById("logout-btn").style.display = "inline-block";
       updateBoosterCount();
       updateCollection();
-      updateResetTimer();
-      setInterval(updateResetTimer, 1000);
-      setInterval(checkDateReset, 1000);
     }
 
     function logout() {
@@ -308,33 +339,6 @@
       document.getElementById("app").style.display = "none";
       document.getElementById("logout-btn").style.display = "none";
       document.getElementById("codeInput").value = "";
-    }
-
-    function updateResetTimer() {
-      const now = new Date();
-      const tomorrow = new Date();
-      tomorrow.setDate(now.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-
-      const diff = tomorrow - now;
-      const hours = String(Math.floor(diff / 1000 / 60 / 60)).padStart(2, '0');
-      const minutes = String(Math.floor((diff / 1000 / 60) % 60)).padStart(2, '0');
-      const seconds = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
-
-      document.getElementById("reset-timer").textContent =
-        `Réinitialisation dans : ${hours}:${minutes}:${seconds}`;
-    }
-
-    function checkDateReset() {
-      const now = new Date().toDateString();
-      if (now !== currentDate) {
-        currentDate = now;
-        const data = getData();
-        data.remaining = dailyLimit;
-        data.date = currentDate;
-        saveData(data);
-        updateBoosterCount();
-      }
     }
   </script>
 </body>
