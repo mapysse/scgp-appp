@@ -80,8 +80,12 @@
       background-size: cover;
       background-position: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      cursor: pointer; /* pour montrer que c’est cliquable */
-      transition: transform 0.3s ease;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+    .card.expanded {
+      transform: scale(2);
+      z-index: 1000;
     }
     .count-badge {
       position: absolute;
@@ -92,7 +96,6 @@
       font-size: 0.75rem;
       padding: 2px 6px;
       border-radius: 10px;
-      pointer-events: none; /* pour que le clic passe à la carte */
     }
     .section {
       display: none;
@@ -145,6 +148,7 @@
     <main>
       <section id="booster" class="section visible">
         <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
+        <p id="reset-timer" style="font-size: 0.9rem; color: #555;"></p>
         <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
         <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
         <div id="booster-result" class="card-container"></div>
@@ -160,22 +164,17 @@
   <script>
     const cardsPerBooster = 3;
     const dailyLimit = 3;
-    const today = new Date().toDateString();
-    let currentCode = "";
-
-    // Remplacez ici par vos propres valeurs GitHub :
-    const utilisateur = "ton-utilisateur";
-    const depot = "ton-depot";
-    const branche = "main"; // ou master
-
     const extensions = {
-  "OG": [...Array(125)].map((_, i) =>
-    `images/OG/${String(i + 1).padStart(3, '0')}.jpg`
-  ),
-  "PR": [...Array(65)].map((_, i) =>
-    `images/PR/${String(i + 1).padStart(3, '0')}.jpg`
-  )
-};
+      "OG": [...Array(125)].map((_, i) =>
+        `images/OG/${String(i + 1).padStart(3, '0')}.jpg`
+      ),
+      "PR": [...Array(65)].map((_, i) =>
+        `images/PR/${String(i + 1).padStart(3, '0')}.jpg`
+      )
+    };
+
+    let currentCode = "";
+    let currentDate = new Date().toDateString();
 
     function getStorageKey() {
       return `cardData_user_${currentCode}`;
@@ -183,8 +182,8 @@
 
     function getData() {
       let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
-      if (data.date !== today) {
-        data.date = today;
+      if (data.date !== currentDate) {
+        data.date = currentDate;
         data.remaining = dailyLimit;
       }
       data.collection = data.collection || [];
@@ -233,6 +232,7 @@
         const el = document.createElement("div");
         el.className = "card";
         el.style.backgroundImage = `url(${card.image})`;
+        el.addEventListener("click", toggleCardSize);
         resultContainer.appendChild(el);
       });
 
@@ -253,6 +253,7 @@
         const el = document.createElement("div");
         el.className = "card";
         el.style.backgroundImage = `url(${card.image})`;
+        el.addEventListener("click", toggleCardSize);
 
         if (card.count > 1) {
           const badge = document.createElement("div");
@@ -261,19 +262,12 @@
           el.appendChild(badge);
         }
 
-        // Ajout du gestionnaire de clic pour agrandir/réduire
-        el.addEventListener("click", () => {
-          if (el.style.transform === "scale(2)") {
-            el.style.transform = "";
-            el.style.zIndex = "";
-          } else {
-            el.style.transform = "scale(2)";
-            el.style.zIndex = "10"; // pour être au-dessus des autres cartes
-          }
-        });
-
         container.appendChild(el);
       });
+    }
+
+    function toggleCardSize(e) {
+      e.currentTarget.classList.toggle("expanded");
     }
 
     function switchTab(tab) {
@@ -297,11 +291,15 @@
         return;
       }
       currentCode = code;
+      currentDate = new Date().toDateString();
       document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
       document.getElementById("logout-btn").style.display = "inline-block";
       updateBoosterCount();
       updateCollection();
+      updateResetTimer();
+      setInterval(updateResetTimer, 1000);
+      setInterval(checkDateReset, 1000);
     }
 
     function logout() {
@@ -310,6 +308,33 @@
       document.getElementById("app").style.display = "none";
       document.getElementById("logout-btn").style.display = "none";
       document.getElementById("codeInput").value = "";
+    }
+
+    function updateResetTimer() {
+      const now = new Date();
+      const tomorrow = new Date();
+      tomorrow.setDate(now.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+
+      const diff = tomorrow - now;
+      const hours = String(Math.floor(diff / 1000 / 60 / 60)).padStart(2, '0');
+      const minutes = String(Math.floor((diff / 1000 / 60) % 60)).padStart(2, '0');
+      const seconds = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+
+      document.getElementById("reset-timer").textContent =
+        `Réinitialisation dans : ${hours}:${minutes}:${seconds}`;
+    }
+
+    function checkDateReset() {
+      const now = new Date().toDateString();
+      if (now !== currentDate) {
+        currentDate = now;
+        const data = getData();
+        data.remaining = dailyLimit;
+        data.date = currentDate;
+        saveData(data);
+        updateBoosterCount();
+      }
     }
   </script>
 </body>
