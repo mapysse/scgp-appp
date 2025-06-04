@@ -192,7 +192,7 @@
 
     <main>
       <section id="booster" class="section visible">
-        <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
+        <p>Boosters restants disponibles : <span id="booster-count">3</span></p>
         <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
         <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
         <div id="booster-result" class="card-container"></div>
@@ -207,8 +207,8 @@
 
   <script>
     const cardsPerBooster = 3;
-    const dailyLimit = 3;
-    const today = new Date().toDateString();
+    const maxBoosters = 3;
+    const boosterCooldownMs = 8 * 60 * 60 * 1000; // 8 heures en millisecondes
     let currentCode = "";
 
     const extensions = {
@@ -222,11 +222,8 @@
 
     function getData() {
       let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
-      if (data.date !== today) {
-        data.date = today;
-        data.remaining = dailyLimit;
-      }
       data.collection = data.collection || [];
+      data.boosterTimestamps = data.boosterTimestamps || [];
       localStorage.setItem(getStorageKey(), JSON.stringify(data));
       return data;
     }
@@ -235,15 +232,77 @@
       localStorage.setItem(getStorageKey(), JSON.stringify(data));
     }
 
-    function updateBoosterCount() {
+    // Calcul des boosters disponibles et temps avant le prochain booster dispo
+    function getBoosterStatus() {
       const data = getData();
-      document.getElementById("booster-count").textContent = data.remaining;
+      const now = Date.now();
+
+      // Filtrer les timestamps expirés (plus vieux que cooldown)
+      data.boosterTimestamps = data.boosterTimestamps.filter(ts => now - ts < boosterCooldownMs);
+
+      // Nombre de boosters rechargés
+      let available = maxBoosters - data.boosterTimestamps.length;
+      if (available < 0) available = 0;
+
+      // Temps avant prochain booster disponible (si max atteint)
+      let timeToNext = 0;
+      if (available === 0) {
+        const oldestTs = Math.min(...data.boosterTimestamps);
+        timeToNext = boosterCooldownMs - (now - oldestTs);
+      }
+
+      saveData(data);
+      return { available, timeToNext };
+    }
+
+    function updateBoosterCount() {
+      const status = getBoosterStatus();
+      document.getElementById("booster-count").textContent = status.available;
+
+      // Affiche un timer s'il y a un temps d'attente
+      if (status.available === 0) {
+        startCooldownTimer(status.timeToNext);
+      } else {
+        clearCooldownTimer();
+        document.getElementById("booster-count").style.color = "black";
+      }
+    }
+
+    let cooldownInterval = null;
+    function startCooldownTimer(ms) {
+      const countEl = document.getElementById("booster-count");
+      clearCooldownTimer();
+
+      function updateTimer() {
+        if (ms <= 0) {
+          updateBoosterCount();
+          return clearCooldownTimer();
+        }
+        const h = Math.floor(ms / (1000 * 60 * 60));
+        const m = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((ms % (1000 * 60)) / 1000);
+        countEl.textContent = `0 (dispo dans ${h}h ${m}m ${s}s)`;
+        countEl.style.color = "red";
+        ms -= 1000;
+      }
+
+      updateTimer();
+      cooldownInterval = setInterval(updateTimer, 1000);
+    }
+
+    function clearCooldownTimer() {
+      if (cooldownInterval) {
+        clearInterval(cooldownInterval);
+        cooldownInterval = null;
+      }
     }
 
     function openBooster(extension) {
       const data = getData();
-      if (data.remaining <= 0) {
-        alert("Vous avez atteint la limite de boosters pour aujourd'hui !");
+      const status = getBoosterStatus();
+
+      if (status.available <= 0) {
+        alert("Vous devez attendre avant d'ouvrir un nouveau booster !");
         return;
       }
 
@@ -264,7 +323,8 @@
         newCards.push({ image, extension });
       }
 
-      data.remaining--;
+      // Ajouter le timestamp de l'ouverture
+      data.boosterTimestamps.push(Date.now());
       saveData(data);
       updateBoosterCount();
 
@@ -309,6 +369,7 @@
             const badge = document.createElement("div");
             badge.className = "count-badge";
             badge.textContent = `x${card.count}`;
+            badge.style.display = "block";
             el.appendChild(badge);
           }
 
@@ -375,6 +436,7 @@
       document.getElementById("app").style.display = "none";
       document.getElementById("logout-btn").style.display = "none";
       document.getElementById("codeInput").value = "";
+      clearCooldownTimer();
     }
   </script>
 </body>
