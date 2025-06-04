@@ -282,13 +282,13 @@
     localStorage.setItem(getStorageKey(), JSON.stringify(data));
   }
 
-  function getAvailableBoosters(data) {
-    const now = Date.now();
-    data.boosterTimestamps = data.boosterTimestamps.filter(ts => now - ts < boosterIntervalMs * maxBoosters);
-    const earned = Math.floor((now - (data.boosterTimestamps[0] || now)) / boosterIntervalMs);
-    const available = Math.min(maxBoosters, earned + data.boosterTimestamps.length);
-    return available;
-  }
+function getAvailableBoosters(data) {
+  const now = Date.now();
+  data.boosterTimestamps = data.boosterTimestamps.filter(ts => now - ts < boosterIntervalMs * maxBoosters);
+  const earned = data.boosterTimestamps.length === 0 ? maxBoosters : Math.floor((now - data.boosterTimestamps[0]) / boosterIntervalMs);
+  const available = Math.min(maxBoosters, earned + data.boosterTimestamps.length);
+  return available;
+}
 
   function updateBoosterCount() {
     const data = getData();
