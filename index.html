@@ -322,19 +322,14 @@ function updateNextBoosterTimer(data) {
   if (!container) return;
 
   const now = Date.now();
-
-  // Si max boosters disponibles, afficher message et stopper timer
   if (getAvailableBoosters(data) >= maxBoosters) {
     container.textContent = "Booster max atteint.";
-    if (nextBoosterTimerId !== null) {
-      clearTimeout(nextBoosterTimerId);
-      nextBoosterTimerId = null;
-    }
     return;
   }
 
   const lastTs = data.boosterTimestamps.length > 0 ? data.boosterTimestamps[data.boosterTimestamps.length - 1] : now;
   const nextTime = lastTs + boosterIntervalMs;
+  const diff = Math.max(0, nextTime - now);
 
   function format(ms) {
     const h = Math.floor(ms / 3600000);
@@ -343,24 +338,31 @@ function updateNextBoosterTimer(data) {
     return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   }
 
-  // Annule timer précédent s’il existe pour éviter doublons
-  if (nextBoosterTimerId !== null) {
-    clearTimeout(nextBoosterTimerId);
-  }
-
+  // Affiche immédiatement le temps restant (ou message)
   function tick() {
-    const remaining = Math.max(0, nextTime - Date.now());
+    const currentData = getData();  // récupère les données fraîches à chaque tick
+    const now = Date.now();
+    if (getAvailableBoosters(currentData) >= maxBoosters) {
+      container.textContent = "Booster max atteint.";
+      return; // Pas besoin de timer ici, on arrête la boucle
+    }
+
+    const lastTs = currentData.boosterTimestamps.length > 0 ? currentData.boosterTimestamps[currentData.boosterTimestamps.length - 1] : now;
+    const nextTime = lastTs + boosterIntervalMs;
+    const remaining = Math.max(0, nextTime - now);
+
     if (remaining <= 0) {
       container.textContent = "Nouveau booster disponible !";
-      updateBoosterCount();
-      nextBoosterTimerId = null; // Timer terminé
+      updateBoosterCount(); // mettre à jour la dispo des boosters
     } else {
       container.textContent = `Prochain booster dans : ${format(remaining)}`;
       nextBoosterTimerId = setTimeout(tick, 1000);
     }
   }
 
-  tick();
+  if (nextBoosterTimerId === null) {
+    tick();
+  }
 }
 
   function openBooster(extension) {
