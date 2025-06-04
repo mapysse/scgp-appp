@@ -76,15 +76,11 @@
       width: 100px;
       height: 140px;
       border-radius: 10px;
+      position: relative;
       background-size: cover;
       background-position: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .card.enlarged {
-      transform: scale(3);
-      z-index: 10;
     }
     .count-badge {
       position: absolute;
@@ -95,6 +91,40 @@
       font-size: 0.75rem;
       padding: 2px 6px;
       border-radius: 10px;
+    }
+    .zoom-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+    .zoom-card {
+      width: 300px;
+      height: 420px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      position: relative;
+      animation: zoomIn 0.3s ease;
+    }
+    .zoom-card .count-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 1rem;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
     .section {
       display: none;
@@ -147,7 +177,6 @@
     <main>
       <section id="booster" class="section visible">
         <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
-        <div id="booster-timer"></div>
         <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
         <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
         <div id="booster-result" class="card-container"></div>
@@ -180,7 +209,6 @@
       if (data.date !== today) {
         data.date = today;
         data.remaining = dailyLimit;
-        data.resetTime = new Date().setHours(24, 0, 0, 0);
       }
       data.collection = data.collection || [];
       localStorage.setItem(getStorageKey(), JSON.stringify(data));
@@ -194,23 +222,6 @@
     function updateBoosterCount() {
       const data = getData();
       document.getElementById("booster-count").textContent = data.remaining;
-      updateTimer(data);
-    }
-
-    function updateTimer(data) {
-      const timerEl = document.getElementById("booster-timer");
-      const interval = setInterval(() => {
-        const remaining = data.resetTime - new Date().getTime();
-        if (remaining <= 0) {
-          clearInterval(interval);
-          timerEl.textContent = "Nouveaux boosters disponibles !";
-        } else {
-          const h = Math.floor(remaining / 3600000);
-          const m = Math.floor((remaining % 3600000) / 60000);
-          const s = Math.floor((remaining % 60000) / 1000);
-          timerEl.textContent = `Prochain reset dans : ${h}h ${m}m ${s}s`;
-        }
-      }, 1000);
     }
 
     function openBooster(extension) {
@@ -267,42 +278,49 @@
         grouped[card.extension].push(card);
       });
 
-      for (const ext of Object.keys(grouped).sort()) {
+      for (const extension in grouped) {
+        const total = extensions[extension].length;
+        const unique = grouped[extension].length;
+
         const title = document.createElement("h4");
-        title.textContent = `Extension ${ext}`;
+        title.textContent = `Extension ${extension} — ${unique}/${total} cartes uniques`;
         container.appendChild(title);
 
-        const groupWrapper = document.createElement("div");
-        groupWrapper.className = "card-container";
-
-        grouped[ext].sort((a, b) => {
-          const numA = parseInt(a.image.match(/(\d+)\.jpg/)[1]);
-          const numB = parseInt(b.image.match(/(\d+)\.jpg/)[1]);
+        grouped[extension].sort((a, b) => {
+          const numA = parseInt(a.image.match(/(\d+)\.jpg$/)[1]);
+          const numB = parseInt(b.image.match(/(\d+)\.jpg$/)[1]);
           return numA - numB;
         });
 
-        grouped[ext].forEach(card => {
+        const section = document.createElement("div");
+        section.className = "card-container";
+        grouped[extension].forEach(card => {
           const el = document.createElement("div");
           el.className = "card";
           el.style.backgroundImage = `url(${card.image})`;
-          el.addEventListener("click", toggleCardSize);
-
-          if (card.count > 1) {
-            const badge = document.createElement("div");
-            badge.className = "count-badge";
-            badge.textContent = `x${card.count}`;
-            el.appendChild(badge);
-          }
-
-          groupWrapper.appendChild(el);
+          el.onclick = () => zoomCard(card.image, card.count);
+          section.appendChild(el);
         });
-
-        container.appendChild(groupWrapper);
+        container.appendChild(section);
       }
     }
 
-    function toggleCardSize(e) {
-      e.currentTarget.classList.toggle("enlarged");
+    function zoomCard(image, count) {
+      const overlay = document.createElement("div");
+      overlay.className = "zoom-overlay";
+
+      const zoom = document.createElement("div");
+      zoom.className = "zoom-card";
+      zoom.style.backgroundImage = `url(${image})`;
+
+      const badge = document.createElement("div");
+      badge.className = "count-badge";
+      badge.textContent = `x${count}`;
+      zoom.appendChild(badge);
+
+      overlay.appendChild(zoom);
+      overlay.onclick = () => document.body.removeChild(overlay);
+      document.body.appendChild(overlay);
     }
 
     function switchTab(tab) {
