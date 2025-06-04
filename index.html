@@ -255,254 +255,277 @@
   <div id="booster-preview-overlay" style="display:none;"></div>
 
   <script>
-    const cardsPerBooster = 5;
-    const dailyLimit = 3;
-    const today = new Date().toDateString();
-    let currentCode = "";
+  const cardsPerBooster = 5;
+  const boosterIntervalMs = 8 * 60 * 60 * 1000; // 8 heures
+  const maxBoosters = 3;
+  let currentCode = "";
 
-    const extensions = {
-      OG: Array.from({ length: 125 }, (_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
-      PR: Array.from({ length: 65 }, (_, i) => `images/PR/${String(i + 1).padStart(3, '0')}.jpg`),
-    };
+  const extensions = {
+    OG: Array.from({ length: 125 }, (_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
+    PR: Array.from({ length: 65 }, (_, i) => `images/PR/${String(i + 1).padStart(3, '0')}.jpg`),
+  };
 
-    function getStorageKey() {
-      return `cardData_user_${currentCode}`;
+  function getStorageKey() {
+    return `cardData_user_${currentCode}`;
+  }
+
+  function getData() {
+    let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
+    data.boosterTimestamps = data.boosterTimestamps || [];
+    data.collection = data.collection || [];
+    data.lastBooster = data.lastBooster || null;
+    localStorage.setItem(getStorageKey(), JSON.stringify(data));
+    return data;
+  }
+
+  function saveData(data) {
+    localStorage.setItem(getStorageKey(), JSON.stringify(data));
+  }
+
+  function getAvailableBoosters(data) {
+    const now = Date.now();
+    data.boosterTimestamps = data.boosterTimestamps.filter(ts => now - ts < boosterIntervalMs * maxBoosters);
+    const earned = Math.floor((now - (data.boosterTimestamps[0] || now)) / boosterIntervalMs);
+    const available = Math.min(maxBoosters, earned + data.boosterTimestamps.length);
+    return available;
+  }
+
+  function updateBoosterCount() {
+    const data = getData();
+    const available = getAvailableBoosters(data);
+    document.getElementById("booster-count").textContent = available;
+    updateNextBoosterTimer(data);
+  }
+
+  function updateNextBoosterTimer(data) {
+    const container = document.getElementById("next-booster-timer");
+    if (!container) return;
+
+    const now = Date.now();
+    if (getAvailableBoosters(data) >= maxBoosters) {
+      container.textContent = "Booster max atteint.";
+      return;
     }
 
-    function getData() {
-      let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
-      if (data.date !== today) {
-        data.date = today;
-        data.remaining = dailyLimit;
+    const lastTs = data.boosterTimestamps.length > 0 ? data.boosterTimestamps[data.boosterTimestamps.length - 1] : now;
+    const nextTime = lastTs + boosterIntervalMs;
+    const diff = Math.max(0, nextTime - now);
+
+    function format(ms) {
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    }
+
+    function tick() {
+      const remaining = Math.max(0, nextTime - Date.now());
+      if (remaining <= 0) {
+        container.textContent = "Nouveau booster disponible !";
+        updateBoosterCount();
+      } else {
+        container.textContent = `Prochain booster dans : ${format(remaining)}`;
+        setTimeout(tick, 1000);
       }
-      data.collection = data.collection || [];
-      data.lastBooster = data.lastBooster || null; // Pour stocker le dernier booster ouvert
-      localStorage.setItem(getStorageKey(), JSON.stringify(data));
-      return data;
+    }
+    tick();
+  }
+
+  function openBooster(extension) {
+    const data = getData();
+    const available = getAvailableBoosters(data);
+    if (available <= 0) {
+      alert("Aucun booster disponible pour le moment !");
+      return;
     }
 
-    function saveData(data) {
-      localStorage.setItem(getStorageKey(), JSON.stringify(data));
-    }
-
-    function updateBoosterCount() {
-      const data = getData();
-      document.getElementById("booster-count").textContent = data.remaining;
-    }
-
+    const pool = extensions[extension];
     let boosterCardsToShow = [];
-    let boosterCardIndex = 0;
-
-    function openBooster(extension) {
-      const data = getData();
-      if (data.remaining <= 0) {
-        alert("Vous avez atteint la limite de boosters pour aujourd'hui !");
-        return;
-      }
-
-      const pool = extensions[extension];
-      boosterCardsToShow = [];
-      boosterCardIndex = 0;
-
-      // On prépare 5 cartes tirées aléatoirement
-      for (let i = 0; i < cardsPerBooster; i++) {
-        const image = pool[Math.floor(Math.random() * pool.length)];
-        boosterCardsToShow.push({ image, extension, isNew: false });
-      }
-
-      // On va marquer les cartes qui sont nouvelles (pas encore dans la collection)
-      boosterCardsToShow.forEach(card => {
-        const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
-        card.isNew = !existing;
-      });
-
-      // On met à jour la collection avec ces cartes (ajout ou incrément)
-      boosterCardsToShow.forEach(card => {
-        const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
-        if (existing) {
-          existing.count = (existing.count || 1) + 1;
-        } else {
-          data.collection.push({ image: card.image, extension: card.extension, count: 1 });
-        }
-      });
-
-      data.remaining--;
-      data.lastBooster = boosterCardsToShow.map(c => ({...c})); // clonage pour mémoire
-      saveData(data);
-      updateBoosterCount();
-
-      // Affichage de la 1ère carte en grand
-      showBoosterPreview();
-
-      // Cacher le résumé dernier booster (sera mis à jour à la fermeture)
-      document.getElementById("last-booster-summary").style.display = "none";
-      updateCollection();
+    for (let i = 0; i < cardsPerBooster; i++) {
+      const image = pool[Math.floor(Math.random() * pool.length)];
+      boosterCardsToShow.push({ image, extension, isNew: false });
     }
 
-    function showBoosterPreview() {
-      const overlay = document.getElementById("booster-preview-overlay");
+    boosterCardsToShow.forEach(card => {
+      const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
+      card.isNew = !existing;
+    });
+
+    boosterCardsToShow.forEach(card => {
+      const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
+      if (existing) {
+        existing.count = (existing.count || 1) + 1;
+      } else {
+        data.collection.push({ image: card.image, extension: card.extension, count: 1 });
+      }
+    });
+
+    data.boosterTimestamps.push(Date.now());
+    data.lastBooster = boosterCardsToShow.map(c => ({ ...c }));
+    saveData(data);
+    updateBoosterCount();
+    showBoosterPreview(boosterCardsToShow);
+    updateCollection();
+    document.getElementById("last-booster-summary").style.display = "none";
+  }
+
+  function showBoosterPreview(boosterCardsToShow) {
+    const overlay = document.getElementById("booster-preview-overlay");
+    overlay.innerHTML = "";
+    overlay.style.display = "flex";
+
+    let idx = 0;
+
+    function showCard(i) {
       overlay.innerHTML = "";
-      overlay.style.display = "flex";
-
-      let idx = 0;
-
-      function showCard(i) {
-        overlay.innerHTML = "";
-        const card = boosterCardsToShow[i];
-        if (!card) return;
-
-        const el = document.createElement("div");
-        el.className = "card";
-        el.style.backgroundImage = `url(${card.image})`;
-        if (card.isNew) {
-          const star = document.createElement("div");
-          star.textContent = "⭐";
-          star.className = "star-emoji";
-          el.appendChild(star);
-        }
-        overlay.appendChild(el);
-
-        el.onclick = () => {
-          idx++;
-          if (idx < boosterCardsToShow.length) {
-            showCard(idx);
-          } else {
-            overlay.style.display = "none";
-            showLastBoosterSummary();
-          }
-        };
+      const card = boosterCardsToShow[i];
+      const el = document.createElement("div");
+      el.className = "card";
+      el.style.backgroundImage = `url(${card.image})`;
+      if (card.isNew) {
+        const star = document.createElement("div");
+        star.textContent = "⭐";
+        star.className = "star-emoji";
+        el.appendChild(star);
       }
-
-      showCard(0);
+      overlay.appendChild(el);
+      el.onclick = () => {
+        idx++;
+        if (idx < boosterCardsToShow.length) {
+          showCard(idx);
+        } else {
+          overlay.style.display = "none";
+          showLastBoosterSummary();
+        }
+      };
     }
 
-    function showLastBoosterSummary() {
-      const data = getData();
-      const summary = document.getElementById("last-booster-summary");
-      const container = document.getElementById("last-booster-cards");
-      container.innerHTML = "";
+    showCard(0);
+  }
 
-      if (!data.lastBooster || data.lastBooster.length === 0) {
-        summary.style.display = "none";
-        return;
+  function showLastBoosterSummary() {
+    const data = getData();
+    const summary = document.getElementById("last-booster-summary");
+    const container = document.getElementById("last-booster-cards");
+    container.innerHTML = "";
+
+    if (!data.lastBooster) {
+      summary.style.display = "none";
+      return;
+    }
+
+    data.lastBooster.forEach(card => {
+      const el = document.createElement("div");
+      el.className = "card";
+      el.style.backgroundImage = `url(${card.image})`;
+      if (card.isNew) {
+        const star = document.createElement("div");
+        star.textContent = "⭐";
+        star.className = "star-emoji";
+        el.appendChild(star);
       }
+      container.appendChild(el);
+    });
 
-      data.lastBooster.forEach(card => {
-        const el = document.createElement("div");
-        el.className = "card";
-        el.style.backgroundImage = `url(${card.image})`;
-        if (card.isNew) {
-          const star = document.createElement("div");
-          star.textContent = "⭐";
-          star.className = "star-emoji";
-          el.appendChild(star);
-        }
-        container.appendChild(el);
+    summary.style.display = "block";
+  }
+
+  function updateCollection() {
+    const data = getData();
+    const container = document.getElementById("collection-extensions");
+    container.innerHTML = "";
+
+    for (const ext in extensions) {
+      const cards = data.collection.filter(c => c.extension === ext && c.count > 0);
+      const uniqueCount = cards.length;
+      const total = extensions[ext].length;
+
+      if (uniqueCount === 0) continue;
+
+      const title = document.createElement("h4");
+      title.textContent = `${ext} : ${uniqueCount}/${total}`;
+      const wrapper = document.createElement("div");
+      wrapper.className = "card-container";
+
+      const sorted = cards.slice().sort((a, b) => {
+        const na = parseInt(a.image.match(/(\d+)\.jpg$/)[1]);
+        const nb = parseInt(b.image.match(/(\d+)\.jpg$/)[1]);
+        return na - nb;
       });
 
-      summary.style.display = "block";
+      sorted.forEach(card => {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.style.backgroundImage = `url(${card.image})`;
+        el.onclick = () => expandCard(card.image, card.count);
+        if (card.count > 1) {
+          const badge = document.createElement("div");
+          badge.className = "count-badge";
+          badge.textContent = `x${card.count}`;
+          el.appendChild(badge);
+        }
+        wrapper.appendChild(el);
+      });
+
+      container.appendChild(title);
+      container.appendChild(wrapper);
+    }
+  }
+
+  function expandCard(image, count) {
+    const overlay = document.createElement("div");
+    overlay.className = "overlay";
+    overlay.onclick = () => document.body.removeChild(overlay);
+
+    const card = document.createElement("div");
+    card.className = "card expanded";
+    card.style.backgroundImage = `url(${image})`;
+
+    if (count > 1) {
+      const badge = document.createElement("div");
+      badge.className = "count-badge";
+      badge.textContent = `x${count}`;
+      card.appendChild(badge);
     }
 
-    function updateCollection() {
-      const data = getData();
-      const container = document.getElementById("collection-extensions");
-      container.innerHTML = "";
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  }
 
-      for (const ext in extensions) {
-        // On filtre uniquement les cartes obtenues (count > 0)
-        const cards = data.collection.filter(c => c.extension === ext && c.count > 0);
-        const uniqueCount = cards.length;
-        const total = extensions[ext].length;
+  function switchTab(tab) {
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("visible"));
+    document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add("active");
+    document.getElementById(tab).classList.add("visible");
+  }
 
-        if (uniqueCount === 0) continue; // Pas d'affichage si aucune carte obtenue dans cette extension
-
-        const title = document.createElement("h4");
-        title.textContent = `${ext} : ${uniqueCount}/${total}`; // Format demandé
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "card-container";
-
-        // Tri par numéro de carte extrait de l'image
-        const sorted = cards.slice().sort((a, b) => {
-          const na = parseInt(a.image.match(/(\d+)\.jpg$/)[1]);
-          const nb = parseInt(b.image.match(/(\d+)\.jpg$/)[1]);
-          return na - nb;
-        });
-
-        sorted.forEach(card => {
-          const el = document.createElement("div");
-          el.className = "card";
-          el.style.backgroundImage = `url(${card.image})`;
-          el.onclick = () => expandCard(card.image, card.count);
-
-          if (card.count > 1) {
-            const badge = document.createElement("div");
-            badge.className = "count-badge";
-            badge.textContent = `x${card.count}`;
-            el.appendChild(badge);
-          }
-
-          wrapper.appendChild(el);
-        });
-
-        container.appendChild(title);
-        container.appendChild(wrapper);
-      }
+  function login() {
+    const input = document.getElementById("codeInput");
+    const code = input.value.trim();
+    if (!/^\d{6}$/.test(code)) {
+      alert("Veuillez entrer un code valide à 6 chiffres.");
+      return;
     }
+    currentCode = code;
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("logout-btn").style.display = "block";
+    updateBoosterCount();
+    updateCollection();
+  }
 
-    function expandCard(image, count) {
-      // Crée un overlay avec la carte agrandie à 3x taille des cartes (100x140 => 300x420)
-      const overlay = document.createElement("div");
-      overlay.className = "overlay";
-      overlay.onclick = () => document.body.removeChild(overlay);
+  function logout() {
+    currentCode = "";
+    document.getElementById("login").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("logout-btn").style.display = "none";
+    document.getElementById("codeInput").value = "";
+  }
 
-      const card = document.createElement("div");
-      card.className = "card expanded";
-      card.style.backgroundImage = `url(${image})`;
-
-      if (count > 1) {
-        const badge = document.createElement("div");
-        badge.className = "count-badge";
-        badge.textContent = `x${count}`;
-        card.appendChild(badge);
-      }
-
-      overlay.appendChild(card);
-      document.body.appendChild(overlay);
-    }
-
-    function switchTab(tab) {
-      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      document.querySelectorAll(".section").forEach(s => s.classList.remove("visible"));
-
-      document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add("active");
-      document.getElementById(tab).classList.add("visible");
-    }
-
-    function login() {
-      const input = document.getElementById("codeInput");
-      const code = input.value.trim();
-      if (!/^\d{6}$/.test(code)) {
-        alert("Veuillez entrer un code valide à 6 chiffres.");
-        return;
-      }
-      currentCode = code;
-
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      document.getElementById("logout-btn").style.display = "block";
-
-      updateBoosterCount();
-      updateCollection();
-    }
-
-    function logout() {
-      currentCode = "";
-      document.getElementById("login").style.display = "flex";
-      document.getElementById("app").style.display = "none";
-      document.getElementById("logout-btn").style.display = "none";
-      document.getElementById("codeInput").value = "";
-    }
-  </script>
+  // Lancer le timer de mise à jour auto toutes les secondes
+  setInterval(() => {
+    if (currentCode) updateBoosterCount();
+  }, 1000);
+</script>
 </body>
 </html>
