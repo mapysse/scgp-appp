@@ -92,7 +92,6 @@
       font-size: 0.75rem;
       padding: 2px 6px;
       border-radius: 10px;
-      pointer-events: none;
     }
     .section {
       display: none;
@@ -180,30 +179,26 @@
       color: gold;
       pointer-events: none;
     }
-
-    /* Nouvelle classe overlay pour agrandir carte collection */
+    /* Overlay pour agrandissement carte collection */
     .overlay {
       position: fixed;
-      top: 0; left: 0; right:0; bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.7);
       display: flex;
-      justify-content: center;
       align-items: center;
-      z-index: 1500;
+      justify-content: center;
+      z-index: 1001;
     }
-    .overlay .card {
-      width: 300px !important;
-      height: 420px !important;
+    .overlay .card.expanded {
+      width: 300px; /* 3x la largeur 100px */
+      height: 420px; /* 3x la hauteur 140px */
       border-radius: 15px;
       background-size: cover;
       background-position: center;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.7);
       cursor: pointer;
-      transform-origin: center center;
-      transform: none;
-      transition: transform 0.3s ease;
       position: relative;
-      user-select: none;
+      transition: transform 0.3s ease;
     }
     .overlay .count-badge {
       bottom: 10px;
@@ -214,7 +209,6 @@
       position: absolute;
       background: rgba(0,0,0,0.7);
       color: white;
-      pointer-events: none;
     }
   </style>
 </head>
@@ -282,7 +276,7 @@
         data.remaining = dailyLimit;
       }
       data.collection = data.collection || [];
-      data.lastBooster = data.lastBooster || null;
+      data.lastBooster = data.lastBooster || null; // Pour stocker le dernier booster ouvert
       localStorage.setItem(getStorageKey(), JSON.stringify(data));
       return data;
     }
@@ -310,16 +304,19 @@
       boosterCardsToShow = [];
       boosterCardIndex = 0;
 
+      // On prépare 5 cartes tirées aléatoirement
       for (let i = 0; i < cardsPerBooster; i++) {
         const image = pool[Math.floor(Math.random() * pool.length)];
         boosterCardsToShow.push({ image, extension, isNew: false });
       }
 
+      // On va marquer les cartes qui sont nouvelles (pas encore dans la collection)
       boosterCardsToShow.forEach(card => {
         const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
         card.isNew = !existing;
       });
 
+      // On met à jour la collection avec ces cartes (ajout ou incrément)
       boosterCardsToShow.forEach(card => {
         const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
         if (existing) {
@@ -330,162 +327,155 @@
       });
 
       data.remaining--;
-      data.lastBooster = boosterCardsToShow.map(c => ({...c}));
+      data.lastBooster = boosterCardsToShow.map(c => ({...c})); // clonage pour mémoire
       saveData(data);
       updateBoosterCount();
 
+      // Affichage de la 1ère carte en grand
       showBoosterPreview();
 
+      // Cacher le résumé dernier booster (sera mis à jour à la fermeture)
       document.getElementById("last-booster-summary").style.display = "none";
-      document.getElementById("booster-result").innerHTML = "";
+      updateCollection();
     }
 
     function showBoosterPreview() {
       const overlay = document.getElementById("booster-preview-overlay");
       overlay.innerHTML = "";
-      if (boosterCardsToShow.length === 0) {
-        overlay.style.display = "none";
-        return;
-      }
       overlay.style.display = "flex";
 
-      // Affiche une carte à la fois avec zoom x3 au centre
-      const card = boosterCardsToShow[boosterCardIndex];
-      const cardDiv = document.createElement("div");
-      cardDiv.classList.add("card");
-      cardDiv.style.backgroundImage = `url(${card.image})`;
+      let idx = 0;
 
-      const badge = document.createElement("div");
-      badge.classList.add("count-badge");
-      badge.textContent = boosterCardIndex + 1 + " / " + cardsPerBooster;
-      cardDiv.appendChild(badge);
+      function showCard(i) {
+        overlay.innerHTML = "";
+        const card = boosterCardsToShow[i];
+        if (!card) return;
 
-      cardDiv.onclick = () => {
-        boosterCardIndex++;
-        if (boosterCardIndex >= boosterCardsToShow.length) {
-          closeBoosterPreview();
-          showLastBoosterSummary();
-        } else {
-          showBoosterPreview();
+        const el = document.createElement("div");
+        el.className = "card";
+        el.style.backgroundImage = `url(${card.image})`;
+        if (card.isNew) {
+          const star = document.createElement("div");
+          star.textContent = "⭐";
+          star.className = "star-emoji";
+          el.appendChild(star);
         }
-      };
+        overlay.appendChild(el);
 
-      overlay.appendChild(cardDiv);
-    }
+        el.onclick = () => {
+          idx++;
+          if (idx < boosterCardsToShow.length) {
+            showCard(idx);
+          } else {
+            overlay.style.display = "none";
+            showLastBoosterSummary();
+          }
+        };
+      }
 
-    function closeBoosterPreview() {
-      const overlay = document.getElementById("booster-preview-overlay");
-      overlay.style.display = "none";
-      overlay.innerHTML = "";
+      showCard(0);
     }
 
     function showLastBoosterSummary() {
       const data = getData();
-      const summaryDiv = document.getElementById("last-booster-summary");
+      const summary = document.getElementById("last-booster-summary");
       const container = document.getElementById("last-booster-cards");
       container.innerHTML = "";
 
-      if (!data.lastBooster) {
-        summaryDiv.style.display = "none";
+      if (!data.lastBooster || data.lastBooster.length === 0) {
+        summary.style.display = "none";
         return;
       }
 
       data.lastBooster.forEach(card => {
-        const cardDiv = document.createElement("div");
-        cardDiv.classList.add("card");
-        cardDiv.style.backgroundImage = `url(${card.image})`;
-
+        const el = document.createElement("div");
+        el.className = "card";
+        el.style.backgroundImage = `url(${card.image})`;
         if (card.isNew) {
           const star = document.createElement("div");
-          star.classList.add("star-emoji");
           star.textContent = "⭐";
-          cardDiv.appendChild(star);
+          star.className = "star-emoji";
+          el.appendChild(star);
         }
-        container.appendChild(cardDiv);
+        container.appendChild(el);
       });
 
-      summaryDiv.style.display = "block";
-      renderCollection();
+      summary.style.display = "block";
     }
 
-    function renderCollection() {
+    function updateCollection() {
       const data = getData();
       const container = document.getElementById("collection-extensions");
       container.innerHTML = "";
 
-      // Group cards by extension
-      const grouped = {};
-      data.collection.forEach(card => {
-        if (!grouped[card.extension]) grouped[card.extension] = [];
-        grouped[card.extension].push(card);
-      });
+      for (const ext in extensions) {
+        // On filtre uniquement les cartes obtenues (count > 0)
+        const cards = data.collection.filter(c => c.extension === ext && c.count > 0);
+        const uniqueCount = cards.length;
+        const total = extensions[ext].length;
 
-      for (const ext in grouped) {
-        const extDiv = document.createElement("div");
-        extDiv.style.marginBottom = "2rem";
+        if (uniqueCount === 0) continue; // Pas d'affichage si aucune carte obtenue dans cette extension
 
         const title = document.createElement("h4");
-        title.textContent = `Extension ${ext}`;
-        extDiv.appendChild(title);
+        title.textContent = `${ext} : ${uniqueCount}/${total}`; // Format demandé
 
-        const cardsDiv = document.createElement("div");
-        cardsDiv.classList.add("card-container");
+        const wrapper = document.createElement("div");
+        wrapper.className = "card-container";
 
-        grouped[ext].forEach(card => {
-          const cardDiv = document.createElement("div");
-          cardDiv.classList.add("card");
-          cardDiv.style.backgroundImage = `url(${card.image})`;
-
-          const badge = document.createElement("div");
-          badge.classList.add("count-badge");
-          badge.textContent = card.count;
-          cardDiv.appendChild(badge);
-
-          // Clic pour agrandir la carte dans un overlay avec zoom x3
-          cardDiv.onclick = () => expandCard(card);
-
-          cardsDiv.appendChild(cardDiv);
+        // Tri par numéro de carte extrait de l'image
+        const sorted = cards.slice().sort((a, b) => {
+          const na = parseInt(a.image.match(/(\d+)\.jpg$/)[1]);
+          const nb = parseInt(b.image.match(/(\d+)\.jpg$/)[1]);
+          return na - nb;
         });
 
-        extDiv.appendChild(cardsDiv);
-        container.appendChild(extDiv);
+        sorted.forEach(card => {
+          const el = document.createElement("div");
+          el.className = "card";
+          el.style.backgroundImage = `url(${card.image})`;
+          el.onclick = () => expandCard(card.image, card.count);
+
+          if (card.count > 1) {
+            const badge = document.createElement("div");
+            badge.className = "count-badge";
+            badge.textContent = `x${card.count}`;
+            el.appendChild(badge);
+          }
+
+          wrapper.appendChild(el);
+        });
+
+        container.appendChild(title);
+        container.appendChild(wrapper);
       }
     }
 
-    // Fonction qui crée un overlay avec la carte agrandie x3 au centre
-    function expandCard(card) {
-      // Si déjà un overlay ouvert, ne rien faire
-      if (document.querySelector(".overlay")) return;
-
+    function expandCard(image, count) {
+      // Crée un overlay avec la carte agrandie à 3x taille des cartes (100x140 => 300x420)
       const overlay = document.createElement("div");
-      overlay.classList.add("overlay");
+      overlay.className = "overlay";
+      overlay.onclick = () => document.body.removeChild(overlay);
 
-      const cardDiv = document.createElement("div");
-      cardDiv.classList.add("card");
-      cardDiv.style.backgroundImage = `url(${card.image})`;
+      const card = document.createElement("div");
+      card.className = "card expanded";
+      card.style.backgroundImage = `url(${image})`;
 
-      const badge = document.createElement("div");
-      badge.classList.add("count-badge");
-      badge.textContent = card.count;
-      cardDiv.appendChild(badge);
+      if (count > 1) {
+        const badge = document.createElement("div");
+        badge.className = "count-badge";
+        badge.textContent = `x${count}`;
+        card.appendChild(badge);
+      }
 
-      // Clic sur la carte agrandie ferme l'overlay
-      cardDiv.onclick = () => {
-        document.body.removeChild(overlay);
-      };
-
-      overlay.appendChild(cardDiv);
+      overlay.appendChild(card);
       document.body.appendChild(overlay);
     }
 
     function switchTab(tab) {
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      event.target.classList.add("active");
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("visible"));
 
-      document.querySelectorAll(".section").forEach(section => {
-        section.classList.remove("visible");
-      });
-
+      document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add("active");
       document.getElementById(tab).classList.add("visible");
     }
 
@@ -493,17 +483,17 @@
       const input = document.getElementById("codeInput");
       const code = input.value.trim();
       if (!/^\d{6}$/.test(code)) {
-        alert("Entrez un code valide à 6 chiffres.");
+        alert("Veuillez entrer un code valide à 6 chiffres.");
         return;
       }
       currentCode = code;
+
       document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
-      document.getElementById("logout-btn").style.display = "inline-block";
+      document.getElementById("logout-btn").style.display = "block";
 
       updateBoosterCount();
-      renderCollection();
-      document.getElementById("last-booster-summary").style.display = "none";
+      updateCollection();
     }
 
     function logout() {
@@ -512,8 +502,6 @@
       document.getElementById("app").style.display = "none";
       document.getElementById("logout-btn").style.display = "none";
       document.getElementById("codeInput").value = "";
-      boosterCardsToShow = [];
-      boosterCardIndex = 0;
     }
   </script>
 </body>
