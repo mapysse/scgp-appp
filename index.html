@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Souyette Card Game Pocket</title>
   <style>
     body {
@@ -93,6 +93,7 @@
       padding: 2px 6px;
       border-radius: 10px;
       display: none;
+      user-select: none;
     }
     .card.expanded .count-badge {
       display: block;
@@ -140,12 +141,23 @@
     .overlay .card {
       width: 300px;
       height: 420px;
-      transform: scale(0.5);
+      cursor: pointer;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      user-select: none;
       animation: zoomIn 0.3s ease forwards;
     }
     @keyframes zoomIn {
+      from {
+        transform: scale(0.5);
+        opacity: 0;
+      }
       to {
         transform: scale(1);
+        opacity: 1;
       }
     }
     @keyframes zoomOut {
@@ -171,18 +183,27 @@
       animation: boosterReveal 0.6s ease-out;
       z-index: 1;
     }
+    #countdown {
+      font-weight: bold;
+      margin-top: 6px;
+      text-align: center;
+      color: #c0392b;
+    }
     #last-booster-summary {
-      margin-top: 1.5rem;
+      margin-top: 1rem;
     }
     #last-booster-summary h4 {
       text-align: center;
       margin-bottom: 0.5rem;
     }
-    .star-emoji {
+    #last-booster-summary .card-container .card.new-card::after {
+      content: "⭐";
       position: absolute;
-      bottom: 4px;
-      left: 4px;
-      font-size: 1.2rem;
+      top: 6px;
+      left: 6px;
+      font-size: 1.3rem;
+      color: gold;
+      text-shadow: 0 0 3px black;
       pointer-events: none;
       user-select: none;
     }
@@ -209,10 +230,16 @@
     <main>
       <section id="booster" class="section visible">
         <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
-        <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
-        <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
+        <div id="countdown"></div>
+        <button class="booster-btn" onclick="startBoosterOpening('OG')">🎁 Ouvrir un booster Extension OG</button>
+        <button class="booster-btn" onclick="startBoosterOpening('PR')">🎁 Ouvrir un booster Extension PR</button>
 
-        <div id="last-booster-summary"></div>
+        <div id="booster-overlay-container"></div>
+
+        <div id="last-booster-summary" style="display:none;">
+          <h4>Résumé du dernier booster</h4>
+          <div id="last-booster-cards" class="card-container"></div>
+        </div>
       </section>
 
       <section id="collection" class="section">
@@ -223,12 +250,13 @@
   </div>
 
   <script>
+    const boosterMax = 3;
+    const boosterCooldown = 8 * 60 * 60 * 1000; // 8h en ms
     const cardsPerBooster = 5;
-    const dailyLimit = 3;
-    const today = new Date().toDateString();
     let currentCode = "";
+    let lastOpenedBoosterCards = [];
+    let currentOpenIndex = 0;
 
-    // Extensions with images
     const extensions = {
       OG: Array.from({ length: 125 }, (_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
       PR: Array.from({ length: 65 }, (_, i) => `images/PR/${String(i + 1).padStart(3, '0')}.jpg`),
@@ -240,12 +268,8 @@
 
     function getData() {
       let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
-      if (data.date !== today) {
-        data.date = today;
-        data.remaining = dailyLimit;
-      }
+      data.openTimestamps = data.openTimestamps || [];
       data.collection = data.collection || [];
-      localStorage.setItem(getStorageKey(), JSON.stringify(data));
       return data;
     }
 
@@ -253,200 +277,252 @@
       localStorage.setItem(getStorageKey(), JSON.stringify(data));
     }
 
-    function updateBoosterCount() {
+    function getAvailableBoosters() {
       const data = getData();
-      document.getElementById("booster-count").textContent = data.remaining;
-    }
+      const now = Date.now();
 
-    let currentBoosterCards = [];
-    let currentBoosterExtension = "";
-    let currentCardIndex = 0;
-
-    function openBooster(extension) {
-      const data = getData();
-      if (data.remaining <= 0) {
-        alert("Vous avez atteint la limite de boosters pour aujourd'hui !");
-        return;
-      }
-
-      // Générer 5 cartes aléatoires
-      const pool = extensions[extension];
-      currentBoosterCards = [];
-      currentBoosterExtension = extension;
-      currentCardIndex = 0;
-
-      for (let i = 0; i < cardsPerBooster; i++) {
-        const image = pool[Math.floor(Math.random() * pool.length)];
-        currentBoosterCards.push(image);
-      }
-
-      // Afficher la première carte agrandie
-      showCardOverlay(currentBoosterCards[currentCardIndex]);
-
-      // On ne touche pas encore à la collection, on va la mettre à jour à la fin
-
-      // Pas de modification des boosters restants pour l'instant, on la fera à la fin quand le booster est "validé"
-    }
-
-    function showCardOverlay(image) {
-      // Crée l'overlay
-      let overlay = document.querySelector(".overlay");
-      if (overlay) overlay.remove();
-
-      overlay = document.createElement("div");
-      overlay.className = "overlay";
-
-      const card = document.createElement("div");
-      card.className = "card expanded";
-      card.style.backgroundImage = `url(${image})`;
-      card.style.position = "relative";
-
-      // badge count caché pendant ouverture car pas encore validé
-      // On gère le click pour passer à la carte suivante
-      card.onclick = () => {
-        currentCardIndex++;
-        if (currentCardIndex < currentBoosterCards.length) {
-          // Affiche la carte suivante
-          card.style.backgroundImage = `url(${currentBoosterCards[currentCardIndex]})`;
-        } else {
-          // Fin de l'ouverture, on ferme l'overlay et ajoute les cartes à la collection
-          overlay.remove();
-          finalizeBooster();
-        }
-      };
-
-      overlay.appendChild(card);
-      document.body.appendChild(overlay);
-    }
-
-    function finalizeBooster() {
-      const data = getData();
-      // On ajoute les cartes à la collection et on calcule les cartes nouvelles
-      const newCards = [];
-      currentBoosterCards.forEach(image => {
-        let found = data.collection.find(c => c.image === image);
-        if (found) {
-          found.count++;
-        } else {
-          data.collection.push({ image, extension: currentBoosterExtension, count: 1 });
-          newCards.push(image);
-        }
-      });
-      data.remaining--;
+      // Nettoyer timestamps trop vieux (> 3*8h = 24h)
+      data.openTimestamps = data.openTimestamps.filter(ts => now - ts < boosterCooldown * boosterMax);
       saveData(data);
-      updateBoosterCount();
-      updateCollection();
-      showLastBoosterSummary(newCards);
+
+      // Calcul des crédits
+      const timestampsCount = data.openTimestamps.length;
+
+      if (timestampsCount === 0) return boosterMax;
+
+      const oldestTimestamp = Math.min(...data.openTimestamps);
+      const elapsed = now - oldestTimestamp;
+
+      // Nombre de crédits récupérés depuis le plus vieux timestamp
+      const recoveredCredits = Math.floor(elapsed / boosterCooldown);
+
+      const available = Math.min(boosterMax, timestampsCount < boosterMax ? (boosterMax - timestampsCount + recoveredCredits) : boosterMax);
+
+      return available;
     }
 
-    function showLastBoosterSummary(newCards) {
-      const container = document.getElementById("last-booster-summary");
-      container.innerHTML = "";
+    function updateBoosterCount() {
+      const available = getAvailableBoosters();
+      const countEl = document.getElementById("booster-count");
+      countEl.textContent = available;
 
-      const title = document.createElement("h4");
-      title.textContent = "Résumé du dernier booster";
-      container.appendChild(title);
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "card-container";
-
-      const data = getData();
-
-      currentBoosterCards.forEach(image => {
-        const el = document.createElement("div");
-        el.className = "card";
-        el.style.backgroundImage = `url(${image})`;
-        el.title = image;
-
-        // Affiche l'étoile si jamais obtenue auparavant
-        if (!data.collection.find(c => c.image === image && c.count > 1)) {
-          // Si la carte vient d’être obtenue la première fois, on met l’étoile
-          const star = document.createElement("div");
-          star.className = "star-emoji";
-          star.textContent = "⭐️";
-          el.appendChild(star);
-        }
-
-        wrapper.appendChild(el);
-      });
-
-      container.appendChild(wrapper);
-    }
-
-    function updateCollection() {
-      const data = getData();
-      const container = document.getElementById("collection-extensions");
-      container.innerHTML = "";
-
-      for (const ext in extensions) {
-        const title = document.createElement("h4");
-        title.textContent = `Extension ${ext}`;
-        container.appendChild(title);
-
-        const cardsWrapper = document.createElement("div");
-        cardsWrapper.className = "card-container";
-
-        data.collection
-          .filter(c => c.extension === ext)
-          .forEach(c => {
-            const el = document.createElement("div");
-            el.className = "card";
-            el.style.backgroundImage = `url(${c.image})`;
-
-            const countBadge = document.createElement("div");
-            countBadge.className = "count-badge";
-            countBadge.textContent = c.count;
-            el.appendChild(countBadge);
-
-            cardsWrapper.appendChild(el);
-          });
-
-        container.appendChild(cardsWrapper);
+      if (available < boosterMax) {
+        startCountdown();
+      } else {
+        stopCountdown();
+        const countdownEl = document.getElementById("countdown");
+        if (countdownEl) countdownEl.textContent = "";
       }
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.textContent.toLowerCase() === tab);
-      });
-      document.querySelectorAll(".section").forEach(section => {
-        section.style.display = "none";
-      });
-      document.getElementById(tab).style.display = "block";
+    let countdownInterval = null;
+
+    function startCountdown() {
+      stopCountdown();
+
+      const countdownEl = document.getElementById("countdown");
+
+      countdownInterval = setInterval(() => {
+        const data = getData();
+        const now = Date.now();
+
+        if (data.openTimestamps.length === 0) {
+          countdownEl.textContent = "";
+          stopCountdown();
+          updateBoosterCount();
+          return;
+        }
+
+        // Trier timestamps
+        data.openTimestamps.sort();
+
+        // Prochaine ouverture possible : 8h après le plus ancien timestamp
+        const nextAvailable = data.openTimestamps[0] + boosterCooldown;
+        const diff = nextAvailable - now;
+
+        if (diff <= 0) {
+          // On libère un booster
+          data.openTimestamps.shift();
+          saveData(data);
+          updateBoosterCount();
+          return;
+        }
+
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+
+        countdownEl.textContent = `Prochain booster dans : ${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function stopCountdown() {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
     }
 
     function login() {
-      const code = document.getElementById("codeInput").value.trim();
+      const codeInput = document.getElementById("codeInput");
+      const code = codeInput.value.trim();
+
       if (!/^\d{6}$/.test(code)) {
-        alert("Code invalide. Veuillez entrer un code à 6 chiffres.");
+        alert("Veuillez entrer un code à 6 chiffres valide.");
         return;
       }
       currentCode = code;
       document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
-      document.getElementById("logout-btn").style.display = "inline-block";
-
-      // Reset daily count if needed
-      const data = getData();
-      if (data.date !== today) {
-        data.date = today;
-        data.remaining = dailyLimit;
-        saveData(data);
-      }
+      document.getElementById("logout-btn").style.display = "block";
+      loadCollection();
       updateBoosterCount();
-      updateCollection();
+      showLastBoosterSummary();
     }
 
     function logout() {
-      if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
-        currentCode = "";
-        document.getElementById("app").style.display = "none";
-        document.getElementById("login").style.display = "flex";
-        document.getElementById("logout-btn").style.display = "none";
-        document.getElementById("codeInput").value = "";
-        document.getElementById("last-booster-summary").innerHTML = "";
+      currentCode = "";
+      document.getElementById("login").style.display = "flex";
+      document.getElementById("app").style.display = "none";
+      document.getElementById("logout-btn").style.display = "none";
+      lastOpenedBoosterCards = [];
+      currentOpenIndex = 0;
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('visible'));
+      document.getElementById(tabName).classList.add('visible');
+    }
+
+    function loadCollection() {
+      const data = getData();
+      const container = document.getElementById("collection-extensions");
+      container.innerHTML = "";
+
+      for (const ext in extensions) {
+        const extDiv = document.createElement("div");
+        extDiv.innerHTML = `<h4>Extension ${ext}</h4>`;
+        const cardsDiv = document.createElement("div");
+        cardsDiv.className = "card-container";
+
+        extensions[ext].forEach((img, idx) => {
+          const cardDiv = document.createElement("div");
+          cardDiv.className = "card";
+          cardDiv.style.backgroundImage = `url('${img}')`;
+          if (data.collection.includes(img)) {
+            cardDiv.classList.add("expanded");
+          } else {
+            cardDiv.style.filter = "grayscale(90%)";
+          }
+          cardsDiv.appendChild(cardDiv);
+        });
+
+        extDiv.appendChild(cardsDiv);
+        container.appendChild(extDiv);
       }
     }
+
+    function startBoosterOpening(extension) {
+      const available = getAvailableBoosters();
+      if (available <= 0) {
+        alert("Vous devez attendre avant d'ouvrir un nouveau booster.");
+        return;
+      }
+
+      // Ajouter timestamp ouverture
+      const data = getData();
+      data.openTimestamps.push(Date.now());
+      saveData(data);
+      updateBoosterCount();
+
+      // Générer 5 cartes aléatoires non répétées
+      lastOpenedBoosterCards = [];
+      const extCards = extensions[extension];
+      const dataCollection = getData().collection;
+
+      while (lastOpenedBoosterCards.length < cardsPerBooster) {
+        const candidate = extCards[Math.floor(Math.random() * extCards.length)];
+        // éviter doublons dans ce booster
+        if (!lastOpenedBoosterCards.includes(candidate)) lastOpenedBoosterCards.push(candidate);
+      }
+
+      currentOpenIndex = 0;
+      showCardOverlay(lastOpenedBoosterCards[currentOpenIndex]);
+    }
+
+    function showCardOverlay(imgUrl) {
+      const overlayContainer = document.getElementById("booster-overlay-container");
+      overlayContainer.innerHTML = "";
+
+      const overlay = document.createElement("div");
+      overlay.className = "overlay";
+
+      const cardDiv = document.createElement("div");
+      cardDiv.className = "card expanded";
+      cardDiv.style.backgroundImage = `url('${imgUrl}')`;
+      cardDiv.title = "Cliquez pour voir la carte suivante";
+
+      cardDiv.onclick = () => {
+        currentOpenIndex++;
+        if (currentOpenIndex >= lastOpenedBoosterCards.length) {
+          // Fin du booster : fermer overlay et afficher résumé
+          overlayContainer.innerHTML = "";
+          addToCollection(lastOpenedBoosterCards);
+          showLastBoosterSummary();
+        } else {
+          showCardOverlay(lastOpenedBoosterCards[currentOpenIndex]);
+        }
+      };
+
+      overlay.appendChild(cardDiv);
+      overlayContainer.appendChild(overlay);
+    }
+
+    function addToCollection(cards) {
+      const data = getData();
+      let changed = false;
+      cards.forEach(card => {
+        if (!data.collection.includes(card)) {
+          data.collection.push(card);
+          changed = true;
+        }
+      });
+      if (changed) saveData(data);
+      loadCollection();
+    }
+
+    function showLastBoosterSummary() {
+      if (lastOpenedBoosterCards.length === 0) {
+        document.getElementById("last-booster-summary").style.display = "none";
+        return;
+      }
+      const summaryDiv = document.getElementById("last-booster-summary");
+      const container = document.getElementById("last-booster-cards");
+      container.innerHTML = "";
+      const data = getData();
+
+      lastOpenedBoosterCards.forEach(cardUrl => {
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "card";
+        cardDiv.style.backgroundImage = `url('${cardUrl}')`;
+        // Marquer les cartes jamais obtenues auparavant avec une étoile
+        if (!data.collection.includes(cardUrl)) {
+          cardDiv.classList.add("new-card");
+        }
+        container.appendChild(cardDiv);
+      });
+
+      summaryDiv.style.display = "block";
+    }
+
+    // Init
+    document.getElementById("codeInput").addEventListener("keyup", e => {
+      if (e.key === "Enter") login();
+    });
+
   </script>
 </body>
 </html>
