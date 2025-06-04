@@ -233,6 +233,7 @@
     <main>
       <section id="booster" class="section visible">
         <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
+        <p id="next-booster-timer" style="margin-top: -0.5rem; font-size: 0.95rem; color: #555;"></p>
         <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
         <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
         <div id="booster-result" class="card-container"></div>
@@ -315,26 +316,47 @@ function getAvailableBoosters(data) {
     updateNextBoosterTimer(data);
   }
 
-  function updateNextBoosterTimer(data) {
-    const container = document.getElementById("next-booster-timer");
-    if (!container) return;
+let boosterTimerInterval = null;
 
-    const now = Date.now();
-    if (getAvailableBoosters(data) >= maxBoosters) {
-      container.textContent = "Booster max atteint.";
-      return;
+function updateNextBoosterTimer(data) {
+  const container = document.getElementById("next-booster-timer");
+  if (!container) return;
+
+  if (boosterTimerInterval) clearInterval(boosterTimerInterval);
+
+  const now = Date.now();
+  if (getAvailableBoosters(data) >= maxBoosters) {
+    container.textContent = "Booster max atteint.";
+    return;
+  }
+
+  const lastTs = data.boosterTimestamps.length > 0
+    ? data.boosterTimestamps[data.boosterTimestamps.length - 1]
+    : now;
+  const nextTime = lastTs + boosterIntervalMs;
+
+  function format(ms) {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
+
+  function tick() {
+    const data = getData();
+    const remaining = Math.max(0, nextTime - Date.now());
+    if (remaining <= 0 || getAvailableBoosters(data) >= maxBoosters) {
+      container.textContent = "Nouveau booster disponible !";
+      clearInterval(boosterTimerInterval);
+      updateBoosterCount(); // relance la logique d'affichage
+    } else {
+      container.textContent = `Prochain booster dans : ${format(remaining)}`;
     }
+  }
 
-    const lastTs = data.boosterTimestamps.length > 0 ? data.boosterTimestamps[data.boosterTimestamps.length - 1] : now;
-    const nextTime = lastTs + boosterIntervalMs;
-    const diff = Math.max(0, nextTime - now);
-
-    function format(ms) {
-      const h = Math.floor(ms / 3600000);
-      const m = Math.floor((ms % 3600000) / 60000);
-      const s = Math.floor((ms % 60000) / 1000);
-      return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-    }
+  tick();
+  boosterTimerInterval = setInterval(tick, 1000);
+}
 
     function tick() {
       const remaining = Math.max(0, nextTime - Date.now());
