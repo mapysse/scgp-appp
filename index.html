@@ -284,9 +284,27 @@
 
 function getAvailableBoosters(data) {
   const now = Date.now();
+
+  // Nettoyer les timestamps obsolètes
   data.boosterTimestamps = data.boosterTimestamps.filter(ts => now - ts < boosterIntervalMs * maxBoosters);
-  const earned = data.boosterTimestamps.length === 0 ? maxBoosters : Math.floor((now - data.boosterTimestamps[0]) / boosterIntervalMs);
-  const available = Math.min(maxBoosters, earned + data.boosterTimestamps.length);
+
+  if (data.boosterTimestamps.length === 0) {
+    // Tous les boosters sont disponibles
+    return maxBoosters;
+  }
+
+  // Le dernier booster ouvert (le plus récent)
+  const lastTimestamp = data.boosterTimestamps[data.boosterTimestamps.length - 1];
+
+  // Combien de boosters ont été rechargés depuis le dernier ouvert
+  const boostersRecharged = Math.floor((now - lastTimestamp) / boosterIntervalMs);
+
+  // Calculer le nombre de boosters consommés
+  const consumed = data.boosterTimestamps.length;
+
+  // Boosters disponibles = max - (consommés - rechargés), limité entre 0 et maxBoosters
+  const available = Math.min(maxBoosters, Math.max(0, maxBoosters - (consumed - boostersRecharged)));
+
   return available;
 }
 
