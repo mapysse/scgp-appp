@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Souyette Card Game Pocket</title>
   <style>
     body {
@@ -76,10 +76,10 @@
       width: 100px;
       height: 140px;
       border-radius: 10px;
-      position: relative;
       background-size: cover;
       background-position: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      position: relative;
       cursor: pointer;
     }
     .count-badge {
@@ -91,40 +91,10 @@
       font-size: 0.75rem;
       padding: 2px 6px;
       border-radius: 10px;
+      display: none;
     }
-    .zoom-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      animation: fadeIn 0.3s ease;
-    }
-    .zoom-card {
-      width: 300px;
-      height: 420px;
-      background-size: cover;
-      background-position: center;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      position: relative;
-      animation: zoomIn 0.3s ease;
-    }
-    .zoom-card .count-badge {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      font-size: 1rem;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes zoomIn {
-      from { transform: scale(0.5); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    .card.expanded .count-badge {
+      display: block;
     }
     .section {
       display: none;
@@ -153,6 +123,52 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .overlay .card {
+      width: 300px;
+      height: 420px;
+      transform: scale(0.5);
+      animation: zoomIn 0.3s ease forwards;
+    }
+    @keyframes zoomIn {
+      to {
+        transform: scale(1);
+      }
+    }
+    @keyframes zoomOut {
+      to {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+    }
+    @keyframes boosterReveal {
+      0% {
+        transform: scale(0.5) rotate(-10deg);
+        opacity: 0;
+      }
+      60% {
+        transform: scale(1.05) rotate(2deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) rotate(0);
+      }
+    }
+    .card.reveal {
+      animation: boosterReveal 0.6s ease-out;
+      z-index: 1;
     }
   </style>
 </head>
@@ -184,7 +200,7 @@
 
       <section id="collection" class="section">
         <h3>Votre Collection</h3>
-        <div id="collection-cards"></div>
+        <div id="collection-extensions"></div>
       </section>
     </main>
   </div>
@@ -196,8 +212,8 @@
     let currentCode = "";
 
     const extensions = {
-      "OG": [...Array(125)].map((_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
-      "PR": [...Array(65)].map((_, i) => `images/PR/${String(i + 1).padStart(3, '0')}.jpg`)
+      OG: Array.from({ length: 125 }, (_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
+      PR: Array.from({ length: 65 }, (_, i) => `images/PR/${String(i + 1).padStart(3, '0')}.jpg`),
     };
 
     function getStorageKey() {
@@ -254,7 +270,7 @@
 
       newCards.forEach(card => {
         const el = document.createElement("div");
-        el.className = "card";
+        el.className = "card reveal";
         el.style.backgroundImage = `url(${card.image})`;
         resultContainer.appendChild(el);
       });
@@ -264,68 +280,70 @@
 
     function updateCollection() {
       const data = getData();
-      const container = document.getElementById("collection-cards");
+      const container = document.getElementById("collection-extensions");
       container.innerHTML = "";
 
-      if (data.collection.length === 0) {
-        container.innerHTML = "<p>Vous n'avez encore aucune carte.</p>";
-        return;
-      }
-
-      const grouped = {};
-      data.collection.forEach(card => {
-        if (!grouped[card.extension]) grouped[card.extension] = [];
-        grouped[card.extension].push(card);
-      });
-
-      for (const extension in grouped) {
-        const total = extensions[extension].length;
-        const unique = grouped[extension].length;
-
+      for (const ext in extensions) {
         const title = document.createElement("h4");
-        title.textContent = `Extension ${extension} — ${unique}/${total} cartes uniques`;
-        container.appendChild(title);
+        const cards = data.collection.filter(c => c.extension === ext);
+        const uniqueCount = cards.length;
+        const total = extensions[ext].length;
+        title.textContent = `${ext} : ${uniqueCount}/${total}`;
 
-        grouped[extension].sort((a, b) => {
-          const numA = parseInt(a.image.match(/(\d+)\.jpg$/)[1]);
-          const numB = parseInt(b.image.match(/(\d+)\.jpg$/)[1]);
-          return numA - numB;
+        const wrapper = document.createElement("div");
+        wrapper.className = "card-container";
+
+        const sorted = [...cards].sort((a, b) => {
+          const na = parseInt(a.image.match(/(\d+)\.jpg$/)[1]);
+          const nb = parseInt(b.image.match(/(\d+)\.jpg$/)[1]);
+          return na - nb;
         });
 
-        const section = document.createElement("div");
-        section.className = "card-container";
-        grouped[extension].forEach(card => {
+        sorted.forEach(card => {
           const el = document.createElement("div");
           el.className = "card";
           el.style.backgroundImage = `url(${card.image})`;
-          el.onclick = () => zoomCard(card.image, card.count);
-          section.appendChild(el);
+          el.onclick = () => expandCard(card.image, card.count);
+
+          if (card.count > 1) {
+            const badge = document.createElement("div");
+            badge.className = "count-badge";
+            badge.textContent = `x${card.count}`;
+            el.appendChild(badge);
+          }
+
+          wrapper.appendChild(el);
         });
-        container.appendChild(section);
+
+        container.appendChild(title);
+        container.appendChild(wrapper);
       }
     }
 
-    function zoomCard(image, count) {
+    function expandCard(image, count) {
       const overlay = document.createElement("div");
-      overlay.className = "zoom-overlay";
+      overlay.className = "overlay";
 
-      const zoom = document.createElement("div");
-      zoom.className = "zoom-card";
-      zoom.style.backgroundImage = `url(${image})`;
+      const card = document.createElement("div");
+      card.className = "card expanded";
+      card.style.backgroundImage = `url(${image})`;
+      card.onclick = () => {
+        card.style.animation = "zoomOut 0.3s forwards";
+        setTimeout(() => overlay.remove(), 300);
+      };
 
       const badge = document.createElement("div");
       badge.className = "count-badge";
       badge.textContent = `x${count}`;
-      zoom.appendChild(badge);
+      card.appendChild(badge);
 
-      overlay.appendChild(zoom);
-      overlay.onclick = () => document.body.removeChild(overlay);
+      overlay.appendChild(card);
       document.body.appendChild(overlay);
     }
 
     function switchTab(tab) {
       document.querySelectorAll(".section").forEach(s => s.classList.remove("visible"));
-      document.querySelector(`#${tab}`).classList.add("visible");
+      document.getElementById(tab).classList.add("visible");
 
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
       document.querySelectorAll(".tab-btn").forEach(btn => {
