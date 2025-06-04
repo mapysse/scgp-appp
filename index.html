@@ -260,6 +260,7 @@
   const boosterIntervalMs = 8 * 60 * 60 * 1000; // 8 heures
   const maxBoosters = 3;
   let currentCode = "";
+  let nextBoosterTimerId = null;
 
   const extensions = {
     OG: Array.from({ length: 125 }, (_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
@@ -316,39 +317,51 @@ function getAvailableBoosters(data) {
     updateNextBoosterTimer(data);
   }
 
-  function updateNextBoosterTimer(data) {
-    const container = document.getElementById("next-booster-timer");
-    if (!container) return;
+function updateNextBoosterTimer(data) {
+  const container = document.getElementById("next-booster-timer");
+  if (!container) return;
 
-    const now = Date.now();
-    if (getAvailableBoosters(data) >= maxBoosters) {
-      container.textContent = "Booster max atteint.";
-      return;
+  const now = Date.now();
+
+  // Si max boosters disponibles, afficher message et stopper timer
+  if (getAvailableBoosters(data) >= maxBoosters) {
+    container.textContent = "Booster max atteint.";
+    if (nextBoosterTimerId !== null) {
+      clearTimeout(nextBoosterTimerId);
+      nextBoosterTimerId = null;
     }
-
-    const lastTs = data.boosterTimestamps.length > 0 ? data.boosterTimestamps[data.boosterTimestamps.length - 1] : now;
-    const nextTime = lastTs + boosterIntervalMs;
-    const diff = Math.max(0, nextTime - now);
-
-    function format(ms) {
-      const h = Math.floor(ms / 3600000);
-      const m = Math.floor((ms % 3600000) / 60000);
-      const s = Math.floor((ms % 60000) / 1000);
-      return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-    }
-
-    function tick() {
-      const remaining = Math.max(0, nextTime - Date.now());
-      if (remaining <= 0) {
-        container.textContent = "Nouveau booster disponible !";
-        updateBoosterCount();
-      } else {
-        container.textContent = `Prochain booster dans : ${format(remaining)}`;
-        setTimeout(tick, 1000);
-      }
-    }
-    tick();
+    return;
   }
+
+  const lastTs = data.boosterTimestamps.length > 0 ? data.boosterTimestamps[data.boosterTimestamps.length - 1] : now;
+  const nextTime = lastTs + boosterIntervalMs;
+
+  function format(ms) {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
+
+  // Annule timer précédent s’il existe pour éviter doublons
+  if (nextBoosterTimerId !== null) {
+    clearTimeout(nextBoosterTimerId);
+  }
+
+  function tick() {
+    const remaining = Math.max(0, nextTime - Date.now());
+    if (remaining <= 0) {
+      container.textContent = "Nouveau booster disponible !";
+      updateBoosterCount();
+      nextBoosterTimerId = null; // Timer terminé
+    } else {
+      container.textContent = `Prochain booster dans : ${format(remaining)}`;
+      nextBoosterTimerId = setTimeout(tick, 1000);
+    }
+  }
+
+  tick();
+}
 
   function openBooster(extension) {
     const data = getData();
@@ -548,6 +561,3 @@ function getAvailableBoosters(data) {
 </script>
 </body>
 </html>
-
-
-
