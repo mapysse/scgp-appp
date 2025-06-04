@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Souyette Card Game Pocket</title>
   <style>
     body {
@@ -81,6 +81,7 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       position: relative;
       cursor: pointer;
+      user-select: none;
     }
     .count-badge {
       position: absolute;
@@ -170,6 +171,21 @@
       animation: boosterReveal 0.6s ease-out;
       z-index: 1;
     }
+    #last-booster-summary {
+      margin-top: 1.5rem;
+    }
+    #last-booster-summary h4 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .star-emoji {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      font-size: 1.2rem;
+      pointer-events: none;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -192,10 +208,11 @@
 
     <main>
       <section id="booster" class="section visible">
-        <p>Boosters restants disponibles : <span id="booster-count">3</span></p>
+        <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
         <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
         <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
-        <div id="booster-result" class="card-container"></div>
+
+        <div id="last-booster-summary"></div>
       </section>
 
       <section id="collection" class="section">
@@ -206,11 +223,12 @@
   </div>
 
   <script>
-    const cardsPerBooster = 3;
-    const maxBoosters = 3;
-    const boosterCooldownMs = 8 * 60 * 60 * 1000; // 8 heures en millisecondes
+    const cardsPerBooster = 5;
+    const dailyLimit = 3;
+    const today = new Date().toDateString();
     let currentCode = "";
 
+    // Extensions with images
     const extensions = {
       OG: Array.from({ length: 125 }, (_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
       PR: Array.from({ length: 65 }, (_, i) => `images/PR/${String(i + 1).padStart(3, '0')}.jpg`),
@@ -222,8 +240,11 @@
 
     function getData() {
       let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
+      if (data.date !== today) {
+        data.date = today;
+        data.remaining = dailyLimit;
+      }
       data.collection = data.collection || [];
-      data.boosterTimestamps = data.boosterTimestamps || [];
       localStorage.setItem(getStorageKey(), JSON.stringify(data));
       return data;
     }
@@ -232,110 +253,124 @@
       localStorage.setItem(getStorageKey(), JSON.stringify(data));
     }
 
-    // Calcul des boosters disponibles et temps avant le prochain booster dispo
-    function getBoosterStatus() {
-      const data = getData();
-      const now = Date.now();
-
-      // Filtrer les timestamps expirés (plus vieux que cooldown)
-      data.boosterTimestamps = data.boosterTimestamps.filter(ts => now - ts < boosterCooldownMs);
-
-      // Nombre de boosters rechargés
-      let available = maxBoosters - data.boosterTimestamps.length;
-      if (available < 0) available = 0;
-
-      // Temps avant prochain booster disponible (si max atteint)
-      let timeToNext = 0;
-      if (available === 0) {
-        const oldestTs = Math.min(...data.boosterTimestamps);
-        timeToNext = boosterCooldownMs - (now - oldestTs);
-      }
-
-      saveData(data);
-      return { available, timeToNext };
-    }
-
     function updateBoosterCount() {
-      const status = getBoosterStatus();
-      document.getElementById("booster-count").textContent = status.available;
-
-      // Affiche un timer s'il y a un temps d'attente
-      if (status.available === 0) {
-        startCooldownTimer(status.timeToNext);
-      } else {
-        clearCooldownTimer();
-        document.getElementById("booster-count").style.color = "black";
-      }
+      const data = getData();
+      document.getElementById("booster-count").textContent = data.remaining;
     }
 
-    let cooldownInterval = null;
-    function startCooldownTimer(ms) {
-      const countEl = document.getElementById("booster-count");
-      clearCooldownTimer();
-
-      function updateTimer() {
-        if (ms <= 0) {
-          updateBoosterCount();
-          return clearCooldownTimer();
-        }
-        const h = Math.floor(ms / (1000 * 60 * 60));
-        const m = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((ms % (1000 * 60)) / 1000);
-        countEl.textContent = `0 (dispo dans ${h}h ${m}m ${s}s)`;
-        countEl.style.color = "red";
-        ms -= 1000;
-      }
-
-      updateTimer();
-      cooldownInterval = setInterval(updateTimer, 1000);
-    }
-
-    function clearCooldownTimer() {
-      if (cooldownInterval) {
-        clearInterval(cooldownInterval);
-        cooldownInterval = null;
-      }
-    }
+    let currentBoosterCards = [];
+    let currentBoosterExtension = "";
+    let currentCardIndex = 0;
 
     function openBooster(extension) {
       const data = getData();
-      const status = getBoosterStatus();
-
-      if (status.available <= 0) {
-        alert("Vous devez attendre avant d'ouvrir un nouveau booster !");
+      if (data.remaining <= 0) {
+        alert("Vous avez atteint la limite de boosters pour aujourd'hui !");
         return;
       }
 
-      const resultContainer = document.getElementById("booster-result");
-      resultContainer.innerHTML = "";
-
+      // Générer 5 cartes aléatoires
       const pool = extensions[extension];
-      const newCards = [];
+      currentBoosterCards = [];
+      currentBoosterExtension = extension;
+      currentCardIndex = 0;
 
       for (let i = 0; i < cardsPerBooster; i++) {
         const image = pool[Math.floor(Math.random() * pool.length)];
-        const existing = data.collection.find(c => c.image === image && c.extension === extension);
-        if (existing) {
-          existing.count = (existing.count || 1) + 1;
-        } else {
-          data.collection.push({ image, extension, count: 1 });
-        }
-        newCards.push({ image, extension });
+        currentBoosterCards.push(image);
       }
 
-      // Ajouter le timestamp de l'ouverture
-      data.boosterTimestamps.push(Date.now());
+      // Afficher la première carte agrandie
+      showCardOverlay(currentBoosterCards[currentCardIndex]);
+
+      // On ne touche pas encore à la collection, on va la mettre à jour à la fin
+
+      // Pas de modification des boosters restants pour l'instant, on la fera à la fin quand le booster est "validé"
+    }
+
+    function showCardOverlay(image) {
+      // Crée l'overlay
+      let overlay = document.querySelector(".overlay");
+      if (overlay) overlay.remove();
+
+      overlay = document.createElement("div");
+      overlay.className = "overlay";
+
+      const card = document.createElement("div");
+      card.className = "card expanded";
+      card.style.backgroundImage = `url(${image})`;
+      card.style.position = "relative";
+
+      // badge count caché pendant ouverture car pas encore validé
+      // On gère le click pour passer à la carte suivante
+      card.onclick = () => {
+        currentCardIndex++;
+        if (currentCardIndex < currentBoosterCards.length) {
+          // Affiche la carte suivante
+          card.style.backgroundImage = `url(${currentBoosterCards[currentCardIndex]})`;
+        } else {
+          // Fin de l'ouverture, on ferme l'overlay et ajoute les cartes à la collection
+          overlay.remove();
+          finalizeBooster();
+        }
+      };
+
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+    }
+
+    function finalizeBooster() {
+      const data = getData();
+      // On ajoute les cartes à la collection et on calcule les cartes nouvelles
+      const newCards = [];
+      currentBoosterCards.forEach(image => {
+        let found = data.collection.find(c => c.image === image);
+        if (found) {
+          found.count++;
+        } else {
+          data.collection.push({ image, extension: currentBoosterExtension, count: 1 });
+          newCards.push(image);
+        }
+      });
+      data.remaining--;
       saveData(data);
       updateBoosterCount();
+      updateCollection();
+      showLastBoosterSummary(newCards);
+    }
 
-      newCards.forEach(card => {
+    function showLastBoosterSummary(newCards) {
+      const container = document.getElementById("last-booster-summary");
+      container.innerHTML = "";
+
+      const title = document.createElement("h4");
+      title.textContent = "Résumé du dernier booster";
+      container.appendChild(title);
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "card-container";
+
+      const data = getData();
+
+      currentBoosterCards.forEach(image => {
         const el = document.createElement("div");
-        el.className = "card reveal";
-        el.style.backgroundImage = `url(${card.image})`;
-        resultContainer.appendChild(el);
+        el.className = "card";
+        el.style.backgroundImage = `url(${image})`;
+        el.title = image;
+
+        // Affiche l'étoile si jamais obtenue auparavant
+        if (!data.collection.find(c => c.image === image && c.count > 1)) {
+          // Si la carte vient d’être obtenue la première fois, on met l’étoile
+          const star = document.createElement("div");
+          star.className = "star-emoji";
+          star.textContent = "⭐️";
+          el.appendChild(star);
+        }
+
+        wrapper.appendChild(el);
       });
 
-      updateCollection();
+      container.appendChild(wrapper);
     }
 
     function updateCollection() {
@@ -345,98 +380,72 @@
 
       for (const ext in extensions) {
         const title = document.createElement("h4");
-        const cards = data.collection.filter(c => c.extension === ext);
-        const uniqueCount = cards.length;
-        const total = extensions[ext].length;
-        title.textContent = `${ext} : ${uniqueCount}/${total}`;
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "card-container";
-
-        const sorted = [...cards].sort((a, b) => {
-          const na = parseInt(a.image.match(/(\d+)\.jpg$/)[1]);
-          const nb = parseInt(b.image.match(/(\d+)\.jpg$/)[1]);
-          return na - nb;
-        });
-
-        sorted.forEach(card => {
-          const el = document.createElement("div");
-          el.className = "card";
-          el.style.backgroundImage = `url(${card.image})`;
-          el.onclick = () => expandCard(card.image, card.count);
-
-          if (card.count > 1) {
-            const badge = document.createElement("div");
-            badge.className = "count-badge";
-            badge.textContent = `x${card.count}`;
-            badge.style.display = "block";
-            el.appendChild(badge);
-          }
-
-          wrapper.appendChild(el);
-        });
-
+        title.textContent = `Extension ${ext}`;
         container.appendChild(title);
-        container.appendChild(wrapper);
+
+        const cardsWrapper = document.createElement("div");
+        cardsWrapper.className = "card-container";
+
+        data.collection
+          .filter(c => c.extension === ext)
+          .forEach(c => {
+            const el = document.createElement("div");
+            el.className = "card";
+            el.style.backgroundImage = `url(${c.image})`;
+
+            const countBadge = document.createElement("div");
+            countBadge.className = "count-badge";
+            countBadge.textContent = c.count;
+            el.appendChild(countBadge);
+
+            cardsWrapper.appendChild(el);
+          });
+
+        container.appendChild(cardsWrapper);
       }
     }
 
-    function expandCard(image, count) {
-      const overlay = document.createElement("div");
-      overlay.className = "overlay";
-
-      const card = document.createElement("div");
-      card.className = "card expanded";
-      card.style.backgroundImage = `url(${image})`;
-      card.onclick = () => {
-        card.style.animation = "zoomOut 0.3s forwards";
-        setTimeout(() => overlay.remove(), 300);
-      };
-
-      const badge = document.createElement("div");
-      badge.className = "count-badge";
-      badge.textContent = `x${count}`;
-      card.appendChild(badge);
-
-      overlay.appendChild(card);
-      document.body.appendChild(overlay);
-    }
-
     function switchTab(tab) {
-      document.querySelectorAll(".section").forEach(s => s.classList.remove("visible"));
-      document.getElementById(tab).classList.add("visible");
-
-      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
       document.querySelectorAll(".tab-btn").forEach(btn => {
-        if (btn.textContent.toLowerCase().includes(tab)) {
-          btn.classList.add("active");
-        }
+        btn.classList.toggle("active", btn.textContent.toLowerCase() === tab);
       });
-
-      if (tab === "collection") updateCollection();
+      document.querySelectorAll(".section").forEach(section => {
+        section.style.display = "none";
+      });
+      document.getElementById(tab).style.display = "block";
     }
 
     function login() {
       const code = document.getElementById("codeInput").value.trim();
       if (!/^\d{6}$/.test(code)) {
-        alert("Veuillez entrer un code à 6 chiffres valide.");
+        alert("Code invalide. Veuillez entrer un code à 6 chiffres.");
         return;
       }
       currentCode = code;
       document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
       document.getElementById("logout-btn").style.display = "inline-block";
+
+      // Reset daily count if needed
+      const data = getData();
+      if (data.date !== today) {
+        data.date = today;
+        data.remaining = dailyLimit;
+        saveData(data);
+      }
       updateBoosterCount();
       updateCollection();
     }
 
     function logout() {
-      currentCode = "";
-      document.getElementById("login").style.display = "flex";
-      document.getElementById("app").style.display = "none";
-      document.getElementById("logout-btn").style.display = "none";
-      document.getElementById("codeInput").value = "";
-      clearCooldownTimer();
+      if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
+        currentCode = "";
+        document.getElementById("app").style.display = "none";
+        document.getElementById("login").style.display = "flex";
+        document.getElementById("logout-btn").style.display = "none";
+        document.getElementById("codeInput").value = "";
+        document.getElementById("last-booster-summary").innerHTML = "";
+      }
     }
   </script>
 </body>
