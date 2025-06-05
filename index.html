@@ -404,48 +404,59 @@
       summary.style.display = "block";
     }
 
-    function updateCollection() {
-      const data = getData();
-      const container = document.getElementById("collection-extensions");
-      container.innerHTML = "";
+function updateCollection() {
+  const data = getData();
+  const container = document.getElementById("collection-extensions");
+  container.innerHTML = "";
 
-      // Organiser par extension
-      const collectionsByExtension = {};
-      data.collection.forEach(card => {
-        if (!collectionsByExtension[card.extension]) {
-          collectionsByExtension[card.extension] = [];
-        }
-        collectionsByExtension[card.extension].push(card);
+  // Organiser par extension
+  const collectionsByExtension = {};
+  data.collection.forEach(card => {
+    if (!collectionsByExtension[card.extension]) {
+      collectionsByExtension[card.extension] = [];
+    }
+    collectionsByExtension[card.extension].push(card);
+  });
+
+  for (const ext in collectionsByExtension) {
+    // Trier les cartes par numéro de fichier
+    const cards = collectionsByExtension[ext].sort((a, b) => {
+      const getNumber = img => parseInt(img.image.match(/(\d+)\.jpg$/)[1], 10);
+      return getNumber(a) - getNumber(b);
+    });
+
+    const totalAvailable = ext === "OG" ? 125 : ext === "PR" ? 65 : 0;
+    const owned = new Set(cards.map(c => c.image)).size;
+
+    const extSection = document.createElement("div");
+    extSection.innerHTML = `<h4>Extension ${ext} (${owned}/${totalAvailable})</h4>`;
+
+    const cardsDiv = document.createElement("div");
+    cardsDiv.className = "card-container";
+
+    cards.forEach(card => {
+      const cardDiv = document.createElement("div");
+      cardDiv.className = "card";
+      cardDiv.style.backgroundImage = `url(${card.image})`;
+
+      const countBadge = document.createElement("div");
+      countBadge.className = "count-badge";
+      countBadge.textContent = card.count > 1 ? card.count : "";
+      cardDiv.appendChild(countBadge);
+
+      // Agrandir carte au clic
+      cardDiv.addEventListener("click", () => {
+        showCardOverlay(card.image, card.count);
       });
 
-      for (const ext in collectionsByExtension) {
-        const extSection = document.createElement("div");
-        extSection.innerHTML = `<h4>Extension ${ext}</h4>`;
-        const cardsDiv = document.createElement("div");
-        cardsDiv.className = "card-container";
+      cardsDiv.appendChild(cardDiv);
+    });
 
-        collectionsByExtension[ext].forEach(card => {
-          const cardDiv = document.createElement("div");
-          cardDiv.className = "card";
-          cardDiv.style.backgroundImage = `url(${card.image})`;
+    extSection.appendChild(cardsDiv);
+    container.appendChild(extSection);
+  }
+}
 
-          const countBadge = document.createElement("div");
-          countBadge.className = "count-badge";
-          countBadge.textContent = card.count > 1 ? card.count : "";
-          cardDiv.appendChild(countBadge);
-
-          // Agrandir carte au clic
-          cardDiv.addEventListener("click", () => {
-            showCardOverlay(card.image, card.count);
-          });
-
-          cardsDiv.appendChild(cardDiv);
-        });
-
-        extSection.appendChild(cardsDiv);
-        container.appendChild(extSection);
-      }
-    }
 
     function showCardOverlay(image, count) {
       const overlay = document.createElement("div");
