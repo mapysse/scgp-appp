@@ -286,20 +286,28 @@
 
 function getAvailableBoosters(data) {
   const now = Date.now();
-  const validTimestamps = data.boosterTimestamps.filter(
-    ts => now - ts < boosterIntervalMs * maxBoosters
-  );
 
- if (validTimestamps.length === 0) {
-    // Si aucun booster consommé, tous sont dispo
+  // Nettoyer les timestamps obsolètes
+  data.boosterTimestamps = data.boosterTimestamps.filter(ts => now - ts < boosterIntervalMs * maxBoosters);
+
+  if (data.boosterTimestamps.length === 0) {
+    // Tous les boosters sont disponibles
     return maxBoosters;
   }
-  const earliest = validTimestamps[0];
-  const boostersRecharged = Math.floor((now - earliest) / boosterIntervalMs);
-  const consumed = validTimestamps.length;
-  const available = Math.min(maxBoosters, maxBoosters - consumed + boostersRecharged);
 
-  return Math.max(0, available);
+  // Le dernier booster ouvert (le plus récent)
+  const lastTimestamp = data.boosterTimestamps[data.boosterTimestamps.length - 1];
+
+  // Combien de boosters ont été rechargés depuis le dernier ouvert
+  const boostersRecharged = Math.floor((now - lastTimestamp) / boosterIntervalMs);
+
+  // Calculer le nombre de boosters consommés
+  const consumed = data.boosterTimestamps.length;
+
+  // Boosters disponibles = max - (consommés - rechargés), limité entre 0 et maxBoosters
+  const available = Math.min(maxBoosters, Math.max(0, maxBoosters - (consumed - boostersRecharged)));
+
+  return available;
 }
 
   function updateBoosterCount() {
@@ -314,29 +322,13 @@ function updateNextBoosterTimer(data) {
   if (!container) return;
 
   const now = Date.now();
-
-  // Nettoyer les timestamps vieux de plus de 24h
-  const recentTimestamps = data.boosterTimestamps.filter(
-    ts => now - ts < boosterIntervalMs * maxBoosters
-  );
-
-  // Combien de boosters devraient être disponibles maintenant
-  const earliestTime = now - boosterIntervalMs * maxBoosters;
-  const boostersRecharged = Math.floor((now - earliestTime) / boosterIntervalMs);
-
-  const consumed = recentTimestamps.length;
-  const available = Math.max(0, Math.min(maxBoosters, boostersRecharged - consumed));
-
-  if (available >= maxBoosters) {
+  if (getAvailableBoosters(data) >= maxBoosters) {
     container.textContent = "Booster max atteint.";
     return;
   }
 
-  // Combien de boosters manquent
-  const missing = maxBoosters - (available + consumed);
-
-  // Prochain booster disponible dans :
-  const nextTime = earliestTime + (consumed + 1) * boosterIntervalMs;
+  const lastTs = data.boosterTimestamps.length > 0 ? data.boosterTimestamps[data.boosterTimestamps.length - 1] : now;
+  const nextTime = lastTs + boosterIntervalMs;
   const diff = Math.max(0, nextTime - now);
 
   function format(ms) {
@@ -346,103 +338,72 @@ function updateNextBoosterTimer(data) {
     return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   }
 
-  container.textContent = `Prochain booster dans : ${format(diff)}`;
-}
-
-function tick() {
-  if (nextBoosterTimerId) {
-    clearTimeout(nextBoosterTimerId); // Empêche les timers multiples
-  }
-
-  const currentData = getData();
-  const now = Date.now();
-
-  const recentTimestamps = currentData.boosterTimestamps.filter(
-    ts => now - ts < boosterIntervalMs * maxBoosters
-  );
-
-  const earliestTime = now - boosterIntervalMs * maxBoosters;
-  const boostersRecharged = Math.floor((now - earliestTime) / boosterIntervalMs);
-  const consumed = recentTimestamps.length;
-  const available = Math.max(0, Math.min(maxBoosters, boostersRecharged - consumed));
-
-  if (available >= maxBoosters) {
-    container.textContent = "Booster max atteint.";
-    return;
-  }
-
-  const nextBoosterIndex = consumed;
-  const nextTime = earliestTime + (nextBoosterIndex + 1) * boosterIntervalMs;
-  const remaining = Math.max(0, nextTime - now);
-
-  if (remaining <= 0) {
-    container.textContent = "Nouveau booster disponible !";
-    updateBoosterCount(); // Met à jour l'affichage
-    tick(); // Relance immédiatement pour recalculer
-  } else {
-    container.textContent = `Prochain booster dans : ${format(remaining)}`;
-    nextBoosterTimerId = setTimeout(tick, 1000); // Mise à jour toutes les secondes
-  }
-}
-
-if (nextBoosterTimerId === null) {
-  tick();
-}
-
-function openBooster(extension) {
-  const data = getData();
-  const available = getAvailableBoosters(data);
-  if (available <= 0) {
-    alert("Aucun booster disponible pour le moment !");
-    return;
-  }
-
-  // Récupérer toutes les cartes de l'extension
-  const boosterCards = extensions[extension];
-
-  // Sélection aléatoire de 5 cartes différentes du booster
-  const boosterCardsToShow = [];
-  const usedIndexes = new Set();
-
-  while (boosterCardsToShow.length < cardsPerBooster) {
-    const randIndex = Math.floor(Math.random() * boosterCards.length);
-    if (!usedIndexes.has(randIndex)) {
-      usedIndexes.add(randIndex);
-      boosterCardsToShow.push({ image: boosterCards[randIndex], extension: extension, isNew: true });
+  // Affiche immédiatement le temps restant (ou message)
+  function tick() {
+    const currentData = getData();  // récupère les données fraîches à chaque tick
+    const now = Date.now();
+    if (getAvailableBoosters(currentData) >= maxBoosters) {
+      container.textContent = "Booster max atteint.";
+      return; // Pas besoin de timer ici, on arrête la boucle
     }
-  }
 
-  // Enregistrer la consommation de booster
-  data.boosterTimestamps.push(Date.now());
+    const lastTs = currentData.boosterTimestamps.length > 0 ? currentData.boosterTimestamps[currentData.boosterTimestamps.length - 1] : now;
+    const nextTime = lastTs + boosterIntervalMs;
+    const remaining = Math.max(0, nextTime - now);
 
-  // Nettoyer les timestamps anciens
-  data.boosterTimestamps = data.boosterTimestamps.filter(
-    ts => Date.now() - ts < boosterIntervalMs * maxBoosters
-  );
-
-  // Mettre à jour la collection avec les nouvelles cartes
-  boosterCardsToShow.forEach(card => {
-    const existingCard = data.collection.find(c => c.image === card.image);
-    if (existingCard) {
-      existingCard.count++;
+    if (remaining <= 0) {
+      container.textContent = "Nouveau booster disponible !";
+      updateBoosterCount(); // mettre à jour la dispo des boosters
     } else {
-      data.collection.push({ ...card, count: 1 });
+      container.textContent = `Prochain booster dans : ${format(remaining)}`;
+      nextBoosterTimerId = setTimeout(tick, 1000);
     }
-  });
+  }
 
-  data.lastBooster = boosterCardsToShow.map(c => ({ ...c }));
-  saveData(data);
-  updateBoosterCount();
-
-  // Relancer le timer
-  tick();
-
-  showBoosterPreview(boosterCardsToShow);
-  updateCollection();
-  document.getElementById("last-booster-summary").style.display = "none";
+  if (nextBoosterTimerId === null) {
+    tick();
+  }
 }
 
-    function showBoosterPreview(boosterCardsToShow) {
+  function openBooster(extension) {
+    const data = getData();
+    const available = getAvailableBoosters(data);
+    if (available <= 0) {
+      alert("Aucun booster disponible pour le moment !");
+      return;
+    }
+
+    const pool = extensions[extension];
+    let boosterCardsToShow = [];
+    for (let i = 0; i < cardsPerBooster; i++) {
+      const image = pool[Math.floor(Math.random() * pool.length)];
+      boosterCardsToShow.push({ image, extension, isNew: false });
+    }
+
+    boosterCardsToShow.forEach(card => {
+      const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
+      card.isNew = !existing;
+    });
+
+    boosterCardsToShow.forEach(card => {
+      const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
+      if (existing) {
+        existing.count = (existing.count || 1) + 1;
+      } else {
+        data.collection.push({ image: card.image, extension: card.extension, count: 1 });
+      }
+    });
+
+    data.boosterTimestamps.push(Date.now());
+    data.lastBooster = boosterCardsToShow.map(c => ({ ...c }));
+    saveData(data);
+    updateBoosterCount();
+    showBoosterPreview(boosterCardsToShow);
+    updateCollection();
+    document.getElementById("last-booster-summary").style.display = "none";
+  }
+
+  function showBoosterPreview(boosterCardsToShow) {
     const overlay = document.getElementById("booster-preview-overlay");
     overlay.innerHTML = "";
     overlay.style.display = "flex";
@@ -572,22 +533,20 @@ function openBooster(extension) {
     document.getElementById(tab).classList.add("visible");
   }
 
-function login() {
-  const input = document.getElementById("codeInput");
-  const code = input.value.trim();
-  if (!/^\d{6}$/.test(code)) {
-    alert("Veuillez entrer un code valide à 6 chiffres.");
-    return;
+  function login() {
+    const input = document.getElementById("codeInput");
+    const code = input.value.trim();
+    if (!/^\d{6}$/.test(code)) {
+      alert("Veuillez entrer un code valide à 6 chiffres.");
+      return;
+    }
+    currentCode = code;
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("logout-btn").style.display = "block";
+    updateBoosterCount();
+    updateCollection();
   }
-  currentCode = code;
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  document.getElementById("logout-btn").style.display = "block";
-  
-  updateBoosterCount();  // Met à jour le compteur visuel
-  tick();                // Lancer le compte à rebours dynamique ✅
-  updateCollection();
-}
 
   function logout() {
     currentCode = "";
