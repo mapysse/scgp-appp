@@ -351,8 +351,11 @@ function updateNextBoosterTimer(data) {
 }
 
 function tick() {
-  const container = document.getElementById("next-booster-timer");
-  const currentData = getData(); // Données fraîches
+  if (nextBoosterTimerId) {
+    clearTimeout(nextBoosterTimerId); // Empêche les timers multiples
+  }
+
+  const currentData = getData();
   const now = Date.now();
 
   const recentTimestamps = currentData.boosterTimestamps.filter(
@@ -375,11 +378,11 @@ function tick() {
 
   if (remaining <= 0) {
     container.textContent = "Nouveau booster disponible !";
-    updateBoosterCount(); // Ta fonction pour re-render ou maj
-    tick(); // Relancer pour recalculer
+    updateBoosterCount(); // Met à jour l'affichage
+    tick(); // Relance immédiatement pour recalculer
   } else {
     container.textContent = `Prochain booster dans : ${format(remaining)}`;
-    nextBoosterTimerId = setTimeout(tick, 1000);
+    nextBoosterTimerId = setTimeout(tick, 1000); // Mise à jour toutes les secondes
   }
 }
 
@@ -555,20 +558,22 @@ if (nextBoosterTimerId === null) {
     document.getElementById(tab).classList.add("visible");
   }
 
-  function login() {
-    const input = document.getElementById("codeInput");
-    const code = input.value.trim();
-    if (!/^\d{6}$/.test(code)) {
-      alert("Veuillez entrer un code valide à 6 chiffres.");
-      return;
-    }
-    currentCode = code;
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    document.getElementById("logout-btn").style.display = "block";
-    updateBoosterCount();
-    updateCollection();
+function login() {
+  const input = document.getElementById("codeInput");
+  const code = input.value.trim();
+  if (!/^\d{6}$/.test(code)) {
+    alert("Veuillez entrer un code valide à 6 chiffres.");
+    return;
   }
+  currentCode = code;
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("logout-btn").style.display = "block";
+  
+  updateBoosterCount();  // Met à jour le compteur visuel
+  tick();                // Lancer le compte à rebours dynamique ✅
+  updateCollection();
+}
 
   function logout() {
     currentCode = "";
