@@ -397,28 +397,38 @@ function openBooster(extension) {
     return;
   }
 
-  // Sélection des cartes du booster (ton code d’origine)
-  const boosterCardsToShow = [];
-  const boosterCards = extension.booster;
+  // Récupérer toutes les cartes de l'extension
+  const boosterCards = extensions[extension];
 
-  // Sélection aléatoire des cartes selon ta logique
-  // (exemple basique, adapte selon ton code)
-  for (let i = 0; i < boosterCards.length; i++) {
-    if (Math.random() < 1 / boosterCards.length) {
-      boosterCardsToShow.push(boosterCards[i]);
+  // Sélection aléatoire de 5 cartes différentes du booster
+  const boosterCardsToShow = [];
+  const usedIndexes = new Set();
+
+  while (boosterCardsToShow.length < cardsPerBooster) {
+    const randIndex = Math.floor(Math.random() * boosterCards.length);
+    if (!usedIndexes.has(randIndex)) {
+      usedIndexes.add(randIndex);
+      boosterCardsToShow.push({ image: boosterCards[randIndex], extension: extension, isNew: true });
     }
   }
-  if (boosterCardsToShow.length === 0) {
-    boosterCardsToShow.push(boosterCards[0]);
-  }
 
-  // Consommer un booster en enregistrant la consommation actuelle
+  // Enregistrer la consommation de booster
   data.boosterTimestamps.push(Date.now());
 
-  // Nettoyer les vieux timestamps pour ne garder que les 24h récentes
+  // Nettoyer les timestamps anciens
   data.boosterTimestamps = data.boosterTimestamps.filter(
     ts => Date.now() - ts < boosterIntervalMs * maxBoosters
   );
+
+  // Mettre à jour la collection avec les nouvelles cartes
+  boosterCardsToShow.forEach(card => {
+    const existingCard = data.collection.find(c => c.image === card.image);
+    if (existingCard) {
+      existingCard.count++;
+    } else {
+      data.collection.push({ ...card, count: 1 });
+    }
+  });
 
   data.lastBooster = boosterCardsToShow.map(c => ({ ...c }));
   saveData(data);
@@ -432,7 +442,7 @@ function openBooster(extension) {
   document.getElementById("last-booster-summary").style.display = "none";
 }
 
-  function showBoosterPreview(boosterCardsToShow) {
+    function showBoosterPreview(boosterCardsToShow) {
     const overlay = document.getElementById("booster-preview-overlay");
     overlay.innerHTML = "";
     overlay.style.display = "flex";
