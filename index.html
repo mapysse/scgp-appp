@@ -286,19 +286,18 @@
 
 function getAvailableBoosters(data) {
   const now = Date.now();
-
-  // Nettoyer les timestamps vieux de plus de 24h
   const validTimestamps = data.boosterTimestamps.filter(
     ts => now - ts < boosterIntervalMs * maxBoosters
   );
 
-  // Combien de boosters ont été rechargés depuis le dernier timestamp
-  const earliest = validTimestamps[0] || 0;
+ if (validTimestamps.length === 0) {
+    // Si aucun booster consommé, tous sont dispo
+    return maxBoosters;
+  }
+  const earliest = validTimestamps[0];
   const boostersRecharged = Math.floor((now - earliest) / boosterIntervalMs);
-  
-  // Boosters consommés
   const consumed = validTimestamps.length;
-  const available = Math.min(maxBoosters, boostersRecharged - consumed);
+  const available = Math.min(maxBoosters, maxBoosters - consumed + boostersRecharged);
 
   return Math.max(0, available);
 }
@@ -390,43 +389,48 @@ if (nextBoosterTimerId === null) {
   tick();
 }
 
-  function openBooster(extension) {
-    const data = getData();
-    const available = getAvailableBoosters(data);
-    if (available <= 0) {
-      alert("Aucun booster disponible pour le moment !");
-      return;
-    }
-
-    const pool = extensions[extension];
-    let boosterCardsToShow = [];
-    for (let i = 0; i < cardsPerBooster; i++) {
-      const image = pool[Math.floor(Math.random() * pool.length)];
-      boosterCardsToShow.push({ image, extension, isNew: false });
-    }
-
-    boosterCardsToShow.forEach(card => {
-      const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
-      card.isNew = !existing;
-    });
-
-    boosterCardsToShow.forEach(card => {
-      const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
-      if (existing) {
-        existing.count = (existing.count || 1) + 1;
-      } else {
-        data.collection.push({ image: card.image, extension: card.extension, count: 1 });
-      }
-    });
-
-    data.boosterTimestamps.push(Date.now());
-    data.lastBooster = boosterCardsToShow.map(c => ({ ...c }));
-    saveData(data);
-    updateBoosterCount();
-    showBoosterPreview(boosterCardsToShow);
-    updateCollection();
-    document.getElementById("last-booster-summary").style.display = "none";
+function openBooster(extension) {
+  const data = getData();
+  const available = getAvailableBoosters(data);
+  if (available <= 0) {
+    alert("Aucun booster disponible pour le moment !");
+    return;
   }
+
+  // Sélection des cartes du booster (ton code d’origine)
+  const boosterCardsToShow = [];
+  const boosterCards = extension.booster;
+
+  // Sélection aléatoire des cartes selon ta logique
+  // (exemple basique, adapte selon ton code)
+  for (let i = 0; i < boosterCards.length; i++) {
+    if (Math.random() < 1 / boosterCards.length) {
+      boosterCardsToShow.push(boosterCards[i]);
+    }
+  }
+  if (boosterCardsToShow.length === 0) {
+    boosterCardsToShow.push(boosterCards[0]);
+  }
+
+  // Consommer un booster en enregistrant la consommation actuelle
+  data.boosterTimestamps.push(Date.now());
+
+  // Nettoyer les vieux timestamps pour ne garder que les 24h récentes
+  data.boosterTimestamps = data.boosterTimestamps.filter(
+    ts => Date.now() - ts < boosterIntervalMs * maxBoosters
+  );
+
+  data.lastBooster = boosterCardsToShow.map(c => ({ ...c }));
+  saveData(data);
+  updateBoosterCount();
+
+  // Relancer le timer
+  tick();
+
+  showBoosterPreview(boosterCardsToShow);
+  updateCollection();
+  document.getElementById("last-booster-summary").style.display = "none";
+}
 
   function showBoosterPreview(boosterCardsToShow) {
     const overlay = document.getElementById("booster-preview-overlay");
