@@ -439,10 +439,12 @@ function updateCollection() {
       cardDiv.className = "card";
       cardDiv.style.backgroundImage = `url(${card.image})`;
 
+    if (card.count > 1) {
       const countBadge = document.createElement("div");
       countBadge.className = "count-badge";
-      countBadge.textContent = card.count > 1 ? card.count : "";
+      countBadge.textContent = `x${card.count}`;
       cardDiv.appendChild(countBadge);
+    }
 
       // Agrandir carte au clic
       cardDiv.addEventListener("click", () => {
@@ -466,10 +468,12 @@ function updateCollection() {
       card.className = "card expanded";
       card.style.backgroundImage = `url(${image})`;
 
+    if (count > 1) {
       const countBadge = document.createElement("div");
       countBadge.className = "count-badge";
-      countBadge.textContent = count > 1 ? count : "";
+      countBadge.textContent = `x${count}`;
       card.appendChild(countBadge);
+    }
 
       overlay.appendChild(card);
 
