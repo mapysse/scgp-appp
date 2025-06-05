@@ -479,22 +479,23 @@
       document.getElementById(tab).classList.add("visible");
     }
 
-    function login() {
-      const input = document.getElementById("codeInput");
-      const code = input.value.trim();
-      if (!/^\d{6}$/.test(code)) {
-        alert("Veuillez entrer un code valide à 6 chiffres.");
-        return;
-      }
-      currentCode = code;
+function login() {
+  const input = document.getElementById("codeInput");
+  const code = input.value.trim();
+  console.log("Tentative de connexion avec code:", code);
+  if (!/^\d{6}$/.test(code)) {
+    alert("Veuillez entrer un code valide à 6 chiffres.");
+    return;
+  }
+  currentCode = code;
 
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      document.getElementById("logout-btn").style.display = "block";
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("logout-btn").style.display = "block";
 
-      updateBoosterCount();
-      updateCollection();
-    }
+  updateBoosterCount();
+  updateCollection();
+}
 
     function logout() {
       currentCode = "";
