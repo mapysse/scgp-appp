@@ -379,28 +379,28 @@
 <body>
     <header>
         Souyette Card Game Pocket
-        <button id="logout-btn">Déconnexion</button>
+        <button id="logout-btn" onclick="logout()">Déconnexion</button>
     </header>
 
     <div id="login" class="section visible">
         <h2>Entrez votre code à 6 chiffres</h2>
         <p>⚠️ Soyez bien sur votre navigateur personnel, les comptes sont hébergés en LOCAL ⚠️</p>
         <input type="text" id="codeInput" maxlength="6" placeholder="Ex: 123456" />
-        <button id="login-btn">Connexion</button>
+        <button onclick="login()">Connexion</button>
     </div>
 
     <div id="app" style="display: none;">
         <div class="tabs">
-            <button class="tab-btn active" id="booster-tab-btn">Booster</button>
-            <button class="tab-btn" id="collection-tab-btn">Collection</button>
-            <button class="tab-btn" id="shop-tab-btn">Boutique</button>
+            <button class="tab-btn active" onclick="switchTab('booster')">Booster</button>
+            <button class="tab-btn" onclick="switchTab('collection')">Collection</button>
+            <button class="tab-btn" onclick="switchTab('shop')">Boutique</button>
         </div>
 
         <main>
             <section id="booster" class="section visible">
                 <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
-                <button class="booster-btn" id="open-og-booster">🎁 Ouvrir un booster Extension OG</button>
-                <button class="booster-btn" id="open-pr-booster">🎁 Ouvrir un booster Extension PR</button>
+                <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
+                <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
                 <div id="booster-result" class="card-container"></div>
 
                 <div id="last-booster-summary" style="display:none;">
@@ -462,11 +462,7 @@
         const loginSection = document.getElementById("login");
         const appSection = document.getElementById("app");
         const codeInput = document.getElementById("codeInput");
-        const loginBtn = document.getElementById("login-btn");
-        const logoutBtn = document.getElementById("logout-btn");
         const boosterCountSpan = document.getElementById("booster-count");
-        const openOgBoosterBtn = document.getElementById("open-og-booster");
-        const openPrBoosterBtn = document.getElementById("open-pr-booster");
         const boosterResultContainer = document.getElementById("booster-result");
         const lastBoosterSummary = document.getElementById("last-booster-summary");
         const lastBoosterCardsContainer = document.getElementById("last-booster-cards");
@@ -476,6 +472,7 @@
         const messageBoxOverlay = document.getElementById("message-box-overlay");
         const messageBoxText = document.getElementById("message-box-text");
         const messageBoxOkBtn = document.getElementById("message-box-ok-btn");
+        const logoutBtn = document.getElementById("logout-btn"); // Ajouté car son onclick est dans le HTML
 
         // Boutique éléments
         const shopSection = document.getElementById("shop");
@@ -485,10 +482,6 @@
         const duplicateSelectionArea = document.getElementById("duplicate-selection-area");
         const duplicateSelectionContainer = document.getElementById("duplicate-selection-container");
 
-        // Tabs
-        const boosterTabBtn = document.getElementById("booster-tab-btn");
-        const collectionTabBtn = document.getElementById("collection-tab-btn");
-        const shopTabBtn = document.getElementById("shop-tab-btn");
 
         // Variables d'état du jeu (pour l'ouverture de booster)
         let boosterCardsToShow = [];
@@ -536,12 +529,16 @@
                 data.remaining = DAILY_BOOSTER_LIMIT;
                 data.shopBoughtToday = false; // Réinitialise l'achat de la boutique
                 data.shopDate = today; // Met à jour la date de la boutique
-                data.shopCards = generateShopCardsInternal(data.collection); // Génère de nouvelles cartes pour la boutique
+                data.shopCards = generateShopCardsInternal(data.collection || []); // Génère de nouvelles cartes pour la boutique
             }
 
             data.collection = data.collection || [];
             data.lastBooster = data.lastBooster || null;
-            data.shopCards = data.shopCards || generateShopCardsInternal(data.collection); // Assure que les cartes boutique sont toujours là
+            // Assure que les cartes boutique sont toujours là (pour les cas où data.date était déjà 'today' mais shopCards manquait)
+            if (!data.shopCards || data.shopDate !== today) {
+                 data.shopCards = generateShopCardsInternal(data.collection);
+                 data.shopDate = today;
+            }
             data.shopBoughtToday = data.shopBoughtToday || false;
             data.selectedShopCard = data.selectedShopCard === undefined ? null : data.selectedShopCard;
             data.selectedDuplicatesForShop = data.selectedDuplicatesForShop || [];
@@ -564,11 +561,12 @@
          */
         function updateBoosterCount() {
             const data = getData();
-            boosterCountSpan.textContent = data.remaining;
+            document.getElementById("booster-count").textContent = data.remaining;
         }
 
         /**
          * Ouvre un booster d'une extension donnée.
+         * Reprise de la logique de index (4).html
          * @param {string} extension - L'extension du booster ('OG' ou 'PR').
          */
         function openBooster(extension) {
@@ -582,82 +580,81 @@
             boosterCardsToShow = [];
             boosterCardIndex = 0;
 
-            // MODIFICATION ICI: Vider le container de résultat du booster avant d'ouvrir un nouveau booster
-            boosterResultContainer.innerHTML = "";
-            boosterResultContainer.style.display = "flex"; // S'assurer qu'il est visible
-
-            // MODIFICATION ICI: Cacher le résumé du dernier booster au début de l'ouverture d'un nouveau
-            lastBoosterSummary.style.display = "none";
-
-            // Tirage aléatoire de cartes pour le booster
+            // Tirage aléatoire de cartes
             for (let i = 0; i < CARDS_PER_BOOSTER; i++) {
                 const image = pool[Math.floor(Math.random() * pool.length)];
                 boosterCardsToShow.push({ image, extension, isNew: false });
             }
 
-            // Détection des nouvelles cartes et mise à jour de la collection
+            // Détection des nouvelles cartes
+            boosterCardsToShow.forEach(card => {
+                const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
+                card.isNew = !existing;
+            });
+
+            // Mise à jour collection (incrémente count si déjà présent)
             boosterCardsToShow.forEach(card => {
                 const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
                 if (existing) {
                     existing.count = (existing.count || 1) + 1;
-                    card.isNew = false; // Ce n'est pas une nouvelle carte si déjà dans la collection
                 } else {
                     data.collection.push({ image: card.image, extension: card.extension, count: 1 });
-                    card.isNew = true; // C'est une nouvelle carte
                 }
             });
 
             data.remaining--;
-            data.lastBooster = boosterCardsToShow.map(c => ({...c})); // Clone des cartes du booster
+            data.lastBooster = boosterCardsToShow.map(c => ({...c})); // clone
             saveData(data);
             updateBoosterCount();
 
             showBoosterPreview();
 
-            updateCollection(); // Mettre à jour la collection en arrière-plan
+            // Cacher résumé dernier booster
+            document.getElementById("last-booster-summary").style.display = "none";
+            updateCollection();
         }
 
         /**
          * Affiche l'animation d'ouverture de booster carte par carte.
+         * Reprise de la logique de index (4).html
          */
         function showBoosterPreview() {
-            boosterPreviewOverlay.innerHTML = "";
-            boosterPreviewOverlay.style.display = "flex";
+            const overlay = document.getElementById("booster-preview-overlay");
+            overlay.innerHTML = "";
+            overlay.style.display = "flex";
 
-            let currentBoosterIdx = 0;
+            let idx = 0;
 
-            function showNextCard() {
-                boosterPreviewOverlay.innerHTML = ""; // Nettoie l'overlay
-                const card = boosterCardsToShow[currentBoosterIdx];
+            function showCard(i) {
+                overlay.innerHTML = "";
+                const card = boosterCardsToShow[i];
                 if (!card) return;
 
                 const el = document.createElement("div");
                 el.className = "card";
                 el.style.backgroundImage = `url(${card.image})`;
-
                 if (card.isNew) {
                     const star = document.createElement("div");
                     star.textContent = "⭐";
                     star.className = "star-emoji";
                     el.appendChild(star);
                 }
-                boosterPreviewOverlay.appendChild(el);
+                overlay.appendChild(el);
 
-                // Au clic sur la carte, passe à la suivante ou ferme l'overlay
                 el.onclick = () => {
-                    currentBoosterIdx++;
-                    if (currentBoosterIdx < boosterCardsToShow.length) {
-                        showNextCard();
+                    idx++;
+                    if (idx < boosterCardsToShow.length) {
+                        showCard(idx);
                     } else {
-                        boosterPreviewOverlay.style.display = "none";
-                        // MODIFICATION ICI: Après l'animation, affiche les cartes dans le container principal
+                        overlay.style.display = "none";
+                        // Afficher les cartes dans le conteneur principal du booster une fois l'animation terminée
                         displayBoosterResultCards(boosterCardsToShow);
-                        showLastBoosterSummary(); // Affiche le résumé après toutes les cartes
+                        showLastBoosterSummary();
                     }
                 };
             }
 
-            showNextCard(); // Commence l'affichage par la première carte
+            showCard(0);
         }
 
         /**
@@ -684,13 +681,16 @@
 
         /**
          * Affiche le résumé des cartes obtenues lors du dernier booster ouvert.
+         * Reprise de la logique de index (4).html
          */
         function showLastBoosterSummary() {
             const data = getData();
-            lastBoosterCardsContainer.innerHTML = "";
+            const summary = document.getElementById("last-booster-summary");
+            const container = document.getElementById("last-booster-cards");
+            container.innerHTML = "";
 
             if (!data.lastBooster || data.lastBooster.length === 0) {
-                lastBoosterSummary.style.display = "none";
+                summary.style.display = "none";
                 return;
             }
 
@@ -705,20 +705,22 @@
                     star.className = "star-emoji";
                     el.appendChild(star);
                 }
-                lastBoosterCardsContainer.appendChild(el);
+                container.appendChild(el);
             });
 
-            lastBoosterSummary.style.display = "block";
+            summary.style.display = "block";
         }
 
         /**
          * Met à jour l'affichage de la collection de cartes par extension.
+         * Reprise de la logique de index (4).html
          */
         function updateCollection() {
             const data = getData();
-            collectionExtensionsContainer.innerHTML = "";
+            const container = document.getElementById("collection-extensions");
+            container.innerHTML = "";
 
-            // Organise les cartes par extension
+            // Organiser par extension
             const collectionsByExtension = {};
             data.collection.forEach(card => {
                 if (!collectionsByExtension[card.extension]) {
@@ -728,15 +730,14 @@
             });
 
             for (const ext in collectionsByExtension) {
-                // Trie les cartes par numéro de fichier pour un affichage ordonné
+                // Trier les cartes par numéro de fichier
                 const cards = collectionsByExtension[ext].sort((a, b) => {
                     const getNumber = img => parseInt(img.image.match(/(\d+)\.jpg$/)[1], 10);
                     return getNumber(a) - getNumber(b);
                 });
 
-                // Calcule le total de cartes disponibles dans l'extension et le nombre possédé
                 const totalAvailable = ext === "OG" ? extensions.OG.length : ext === "PR" ? extensions.PR.length : 0;
-                const ownedUnique = new Set(cards.map(c => c.image)).size; // Nombre de cartes uniques possédées
+                const ownedUnique = new Set(cards.map(c => c.image)).size;
 
                 const extSection = document.createElement("div");
                 extSection.innerHTML = `<h4>Extension ${ext} (${ownedUnique}/${totalAvailable})</h4>`;
@@ -749,7 +750,6 @@
                     cardDiv.className = "card";
                     cardDiv.style.backgroundImage = `url(${card.image})`;
 
-                    // Affiche le badge de compte si plus d'un exemplaire
                     if (card.count > 1) {
                         const countBadge = document.createElement("div");
                         countBadge.className = "count-badge";
@@ -757,7 +757,7 @@
                         cardDiv.appendChild(countBadge);
                     }
 
-                    // Ajoute l'écouteur de clic pour agrandir la carte
+                    // Agrandir carte au clic
                     cardDiv.addEventListener("click", () => {
                         showFullCardOverlay(card.image, card.count);
                     });
@@ -766,12 +766,13 @@
                 });
 
                 extSection.appendChild(cardsDiv);
-                collectionExtensionsContainer.appendChild(extSection);
+                container.appendChild(extSection);
             }
         }
 
         /**
          * Affiche un overlay pour agrandir une carte (utilisé pour la collection et la boutique).
+         * Reprise de la logique de index (4).html
          * @param {string} image - Chemin de l'image de la carte.
          * @param {number} count - Nombre d'exemplaires de cette carte.
          */
@@ -848,12 +849,6 @@
          */
         function updateShop() {
             const data = getData(); // S'assure que les données sont à jour (y compris shopDate et shopCards)
-
-            // IMPORTANT: Ne PAS réinitialiser data.selectedShopCard et data.selectedDuplicatesForShop ici
-            // Cela permet aux sélections de persister lors du rafraîchissement de la boutique.
-            // data.selectedShopCard = null; // Ces lignes ont été supprimées
-            // data.selectedDuplicatesForShop = []; // Ces lignes ont été supprimées
-            // saveData(data); // Et donc cette sauvegarde aussi
 
             dailyShopCardsContainer.innerHTML = "";
             duplicateSelectionContainer.innerHTML = "";
@@ -932,7 +927,7 @@
                 buyShopCardBtn.disabled = true;
                 return;
             }
-            
+
             // Trie les doublons pour un affichage cohérent
             availableDuplicates.sort((a, b) => {
                 const getNumber = img => parseInt(img.image.match(/(\d+)\.jpg$/)[1], 10);
@@ -1071,7 +1066,8 @@
             updateShop(); // Met à jour l'affichage de la boutique
 
             // Affiche la carte achetée en grand
-            showFullCardOverlay(cardToBuy.image, existingBoughtCard ? existingBoughtCard.count : 1);
+            showMessage("Achat réussi !"); // Affiche un message de succès
+            // showFullCardOverlay(cardToBuy.image, existingBoughtCard ? existingBoughtCard.count : 1); // Ne pas ouvrir l'overlay auto après le message
         }
 
         /**
@@ -1088,16 +1084,19 @@
             switch (tabName) {
                 case "booster":
                     document.getElementById("booster").classList.add("visible");
-                    boosterTabBtn.classList.add("active");
+                    // Active le bouton d'onglet "Booster"
+                    document.querySelector('.tab-btn[onclick="switchTab(\'booster\')"]').classList.add("active");
                     break;
                 case "collection":
                     document.getElementById("collection").classList.add("visible");
-                    collectionTabBtn.classList.add("active");
+                    // Active le bouton d'onglet "Collection"
+                    document.querySelector('.tab-btn[onclick="switchTab(\'collection\')"]').classList.add("active");
                     updateCollection(); // Mettre à jour la collection à chaque fois qu'on y va
                     break;
                 case "shop":
                     shopSection.classList.add("visible");
-                    shopTabBtn.classList.add("active");
+                    // Active le bouton d'onglet "Boutique"
+                    document.querySelector('.tab-btn[onclick="switchTab(\'shop\')"]').classList.add("active");
                     updateShop(); // Mettre à jour la boutique à chaque fois qu'on y va
                     break;
             }
@@ -1105,6 +1104,7 @@
 
         /**
          * Gère la connexion de l'utilisateur avec le code à 6 chiffres.
+         * Reprise de la logique de index (4).html
          */
         function login() {
             const code = codeInput.value.trim();
@@ -1113,11 +1113,9 @@
                 return;
             }
             currentCode = code;
-            loginSection.style.display = "none";
-            appSection.style.display = "block";
-            logoutBtn.style.display = "inline-block";
-
-            // Initialise et met à jour tous les éléments du jeu après connexion
+            document.getElementById("login").style.display = "none";
+            document.getElementById("app").style.display = "block";
+            document.getElementById("logout-btn").style.display = "inline-block"; // Afficher le bouton de déconnexion
             updateBoosterCount();
             showLastBoosterSummary();
             updateCollection();
@@ -1127,30 +1125,29 @@
 
         /**
          * Gère la déconnexion de l'utilisateur.
+         * Reprise de la logique de index (4).html
          */
         function logout() {
             currentCode = "";
-            loginSection.style.display = "flex";
-            appSection.style.display = "none";
-            logoutBtn.style.display = "none";
-            codeInput.value = ""; // Vide le champ de code
-            // Optionally clear relevant UI elements or game state if desired
+            document.getElementById("login").style.display = "flex";
+            document.getElementById("app").style.display = "none";
+            document.getElementById("logout-btn").style.display = "none";
+            document.getElementById("codeInput").value = ""; // Vide le champ de code
+            // Nettoyage des éléments d'interface à la déconnexion
             boosterResultContainer.innerHTML = "";
             lastBoosterSummary.style.display = "none";
             collectionExtensionsContainer.innerHTML = "";
             dailyShopCardsContainer.innerHTML = "";
             shopMessage.textContent = "";
+            duplicateSelectionContainer.innerHTML = "";
+            buyShopCardBtn.disabled = true;
+            buyShopCardBtn.textContent = `Acheter la carte sélectionnée (${0}/${SHOP_TRADE_COST} doublons)`;
         }
 
         // --- Initialisation des écouteurs d'événements ---
-        loginBtn.addEventListener("click", login);
-        logoutBtn.addEventListener("click", logout);
-        openOgBoosterBtn.addEventListener("click", () => openBooster('OG'));
-        openPrBoosterBtn.addEventListener("click", () => openBooster('PR'));
+        // Le login et le logout ont des onclick directement dans l'HTML, donc pas besoin d'addEventListener ici.
+        // Les boutons booster ont aussi des onclick directement dans l'HTML.
 
-        boosterTabBtn.addEventListener("click", () => switchTab('booster'));
-        collectionTabBtn.addEventListener("click", () => switchTab('collection'));
-        shopTabBtn.addEventListener("click", () => switchTab('shop'));
         buyShopCardBtn.addEventListener("click", buyShopCard);
 
         // Écouteur pour le bouton OK de la boîte de message
