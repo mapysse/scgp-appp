@@ -449,8 +449,8 @@
         // Constantes du jeu
         const CARDS_PER_BOOSTER = 5;
         const DAILY_BOOSTER_LIMIT = 3;
-        const SHOP_DAILY_CARD_COUNT = 3; // Nombre de cartes proposées chaque jour à la boutique
-        const SHOP_NEW_CARD_CHANCE = 0.3; // 60% de chance d'avoir une carte non possédée
+        const SHOP_DAILY_CARD_COUNT = 5; // Nombre de cartes proposées chaque jour à la boutique
+        const SHOP_NEW_CARD_CHANCE = 0.3; // 30% de chance d'avoir une carte non possédée
         const SHOP_TRADE_COST = 5; // Nombre de doublons requis pour un échange
 
         // Date du jour pour réinitialisations
@@ -471,7 +471,7 @@
         const logoutBtn = document.getElementById("logout-btn");
         const boosterCountSpan = document.getElementById("booster-count");
         const openOgBoosterBtn = document.getElementById("open-og-booster");
-        const openPrBoosterBtn = document = document.getElementById("open-pr-booster");
+        const openPrBoosterBtn = document.getElementById("open-pr-booster");
         const boosterResultContainer = document.getElementById("booster-result");
         const lastBoosterSummary = document.getElementById("last-booster-summary");
         const lastBoosterCardsContainer = document.getElementById("last-booster-cards");
@@ -776,15 +776,17 @@
 
         /**
          * Génère les 5 cartes quotidiennes pour la boutique.
-         * 60% de chance d'être une carte non possédée.
+         * 30% de chance d'être une carte non possédée.
          * @param {Array<CardData>} userCollection - La collection actuelle de l'utilisateur.
          * @returns {Array<CardData>} Les 5 cartes de la boutique pour le jour.
          */
         function generateShopCardsInternal(userCollection) {
             const allPossibleCards = [];
-            for (const ext in extensions) {
+            // Cette boucle itère sur 'OG' et 'PR'
+            for (const ext in extensions) { 
                 extensions[ext].forEach(image => {
-                    allPossibleCards.push({ image, extension: ext });
+                    // Ajoute les cartes des deux extensions à la liste de toutes les cartes possibles
+                    allPossibleCards.push({ image, extension: ext }); 
                 });
             }
 
@@ -800,7 +802,7 @@
                 let chosenCard;
                 const isNewChance = Math.random();
 
-                // 60% de chance d'obtenir une nouvelle carte si des nouvelles sont disponibles
+                // 30% de chance d'obtenir une nouvelle carte si des nouvelles sont disponibles
                 if (isNewChance < SHOP_NEW_CARD_CHANCE && unownedCards.length > 0) {
                     chosenCard = unownedCards[Math.floor(Math.random() * unownedCards.length)];
                     // Pour éviter de proposer la même carte non possédée plusieurs fois dans la même sélection journalière
@@ -907,6 +909,7 @@
             availableDuplicates.forEach(card => {
                 const cardDiv = document.createElement("div");
                 // Vérifie si la carte est actuellement sélectionnée comme doublon
+                // CORRECTION: Utilisation de `selCard.extension` au lieu de `selDup.extension`
                 const isSelected = data.selectedDuplicatesForShop.some(
                     selCard => selCard.image === card.image && selCard.extension === card.extension
                 );
@@ -965,8 +968,9 @@
             buyShopCardBtn.disabled = !canBuy;
 
             // Met à jour le texte du bouton si une carte est sélectionnée
-            if (isShopCardSelected) {
-                buyShopCardBtn.textContent = `Acheter "${data.shopCards[data.selectedShopCard].image.split('/').pop().split('.')[0]}" (${data.selectedDuplicatesForShop.length}/${SHOP_TRADE_COST} doublons)`;
+            if (isShopCardSelected && data.shopCards[data.selectedShopCard]) { // Ajout d'une vérification pour s'assurer que la carte est bien définie
+                const cardName = data.shopCards[data.selectedShopCard].image.split('/').pop().split('.')[0];
+                buyShopCardBtn.textContent = `Acheter "${cardName}" (${data.selectedDuplicatesForShop.length}/${SHOP_TRADE_COST} doublons)`;
             } else {
                 buyShopCardBtn.textContent = "Acheter la carte sélectionnée";
             }
