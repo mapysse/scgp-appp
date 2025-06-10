@@ -471,7 +471,7 @@
         const logoutBtn = document.getElementById("logout-btn");
         const boosterCountSpan = document.getElementById("booster-count");
         const openOgBoosterBtn = document.getElementById("open-og-booster");
-        const openPrBoosterBtn = document.getElementById("open-pr-booster");
+        const openPrBoosterBtn = document.getElementById("open-pr-booster"); 
         const boosterResultContainer = document.getElementById("booster-result");
         const lastBoosterSummary = document.getElementById("last-booster-summary");
         const lastBoosterCardsContainer = document.getElementById("last-booster-cards");
@@ -909,7 +909,6 @@
             availableDuplicates.forEach(card => {
                 const cardDiv = document.createElement("div");
                 // Vérifie si la carte est actuellement sélectionnée comme doublon
-                // CORRECTION: Utilisation de `selCard.extension` au lieu de `selDup.extension`
                 const isSelected = data.selectedDuplicatesForShop.some(
                     selCard => selCard.image === card.image && selCard.extension === card.extension
                 );
@@ -927,17 +926,20 @@
                 });
                 duplicateSelectionContainer.appendChild(cardDiv);
             });
-            updateBuyButtonState();
+            updateBuyButtonState(); // Ensure this is called
         }
 
         /**
          * Ajoute ou retire une carte des doublons sélectionnés pour l'échange.
-         * @param {CardData} cardToToggle - La carte à sélectionner/désélectionner.
+         * @param {Object} cardToToggle - La carte à sélectionner/désélectionner (doit avoir image et extension).
          */
         function toggleDuplicateSelection(cardToToggle) {
             const data = getData();
+            // Créer un objet simple avec juste les propriétés nécessaires pour l'identification
+            const identifyingCard = { image: cardToToggle.image, extension: cardToToggle.extension };
+
             const index = data.selectedDuplicatesForShop.findIndex(
-                selCard => selCard.image === cardToToggle.image && selCard.extension === cardToToggle.extension
+                selCard => selCard.image === identifyingCard.image && selCard.extension === identifyingCard.extension
             );
 
             if (index > -1) {
@@ -946,14 +948,13 @@
             } else {
                 // La carte n'est pas sélectionnée, l'ajoute si la limite n'est pas atteinte
                 if (data.selectedDuplicatesForShop.length < SHOP_TRADE_COST) {
-                    data.selectedDuplicatesForShop.push({ image: cardToToggle.image, extension: cardToToggle.extension });
+                    data.selectedDuplicatesForShop.push(identifyingCard); // Ajoute l'objet simplifié
                 } else {
                     showMessage(`Vous ne pouvez sélectionner que ${SHOP_TRADE_COST} doublons différents.`);
                 }
             }
             saveData(data);
-            renderDuplicatesForSelection(); // Rafraîchit l'affichage des doublons
-            updateBuyButtonState(); // Met à jour l'état du bouton d'achat
+            renderDuplicatesForSelection(); // Rafraîchit l'affichage des doublons, qui appellera updateBuyButtonState()
         }
 
         /**
