@@ -825,10 +825,11 @@
         function updateShop() {
             const data = getData(); // S'assure que les données sont à jour (y compris shopDate et shopCards)
 
-            // Réinitialise la sélection de la carte et des doublons au changement d'onglet
-            data.selectedShopCard = null;
-            data.selectedDuplicatesForShop = [];
-            saveData(data); // Sauvegarde l'état réinitialisé
+            // IMPORTANT: Ne PAS réinitialiser data.selectedShopCard et data.selectedDuplicatesForShop ici
+            // Cela permet aux sélections de persister lors du rafraîchissement de la boutique.
+            // data.selectedShopCard = null; // Ces lignes ont été supprimées
+            // data.selectedDuplicatesForShop = []; // Ces lignes ont été supprimées
+            // saveData(data); // Et donc cette sauvegarde aussi
 
             dailyShopCardsContainer.innerHTML = "";
             duplicateSelectionContainer.innerHTML = "";
@@ -849,7 +850,10 @@
             // Affiche les 5 cartes du jour dans la boutique
             data.shopCards.forEach((card, index) => {
                 const cardDiv = document.createElement("div");
-                cardDiv.className = `card ${card.isSelectedForPurchase ? 'selected-for-purchase' : ''}`;
+                // La classe 'selected-for-purchase' est appliquée si la carte correspond à la carte sélectionnée
+                // et si son index correspond à data.selectedShopCard
+                const isSelected = data.selectedShopCard !== null && data.selectedShopCard === index;
+                cardDiv.className = `card ${isSelected ? 'selected-for-purchase' : ''}`;
                 cardDiv.style.backgroundImage = `url(${card.image})`;
 
                 if (card.isNew) {
@@ -878,15 +882,13 @@
          */
         function selectShopCard(index) {
             const data = getData();
-            // Désélectionne explicitement toutes les cartes avant de sélectionner la nouvelle
-            data.shopCards.forEach(card => {
-                card.isSelectedForPurchase = false;
-            });
-
-            // Sélectionne la nouvelle carte
-            data.selectedShopCard = index;
-            data.shopCards[index].isSelectedForPurchase = true;
-
+            // Si la carte est déjà sélectionnée, la désélectionne
+            if (data.selectedShopCard === index) {
+                data.selectedShopCard = null;
+            } else {
+                // Sinon, sélectionne cette carte
+                data.selectedShopCard = index;
+            }
             saveData(data);
             updateShop(); // Rafraîchit l'affichage pour montrer la sélection
         }
@@ -898,6 +900,7 @@
             const data = getData();
             duplicateSelectionContainer.innerHTML = "";
 
+            // Filtre les cartes qui ont plus d'un exemplaire (ce sont les doublons échangeables)
             const availableDuplicates = data.collection.filter(card => card.count > 1);
 
             if (availableDuplicates.length === 0) {
@@ -905,6 +908,16 @@
                 buyShopCardBtn.disabled = true;
                 return;
             }
+            
+            // Trie les doublons pour un affichage cohérent
+            availableDuplicates.sort((a, b) => {
+                const getNumber = img => parseInt(img.image.match(/(\d+)\.jpg$/)[1], 10);
+                if (a.extension === b.extension) {
+                    return getNumber(a) - getNumber(b);
+                }
+                return a.extension.localeCompare(b.extension);
+            });
+
 
             availableDuplicates.forEach(card => {
                 const cardDiv = document.createElement("div");
@@ -915,9 +928,10 @@
                 cardDiv.className = `card ${isSelected ? 'selected-duplicate' : ''}`;
                 cardDiv.style.backgroundImage = `url(${card.image})`;
 
+                // Calcule le nombre de doublons disponibles pour cette carte (total - 1)
                 const countBadge = document.createElement("div");
                 countBadge.className = "count-badge";
-                countBadge.textContent = `x${card.count - 1}`; // Affiche le nombre de doublons disponibles
+                countBadge.textContent = `x${card.count - 1}`; 
                 cardDiv.appendChild(countBadge);
 
                 // Ajoute l'écouteur de clic pour sélectionner/désélectionner le doublon
@@ -973,7 +987,7 @@
                 const cardName = data.shopCards[data.selectedShopCard].image.split('/').pop().split('.')[0];
                 buyShopCardBtn.textContent = `Acheter "${cardName}" (${data.selectedDuplicatesForShop.length}/${SHOP_TRADE_COST} doublons)`;
             } else {
-                buyShopCardBtn.textContent = "Acheter la carte sélectionnée";
+                buyShopCardBtn.textContent = `Acheter la carte sélectionnée (${data.selectedDuplicatesForShop.length}/${SHOP_TRADE_COST} doublons)`;
             }
         }
 
