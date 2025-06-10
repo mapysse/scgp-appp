@@ -471,7 +471,7 @@
         const logoutBtn = document.getElementById("logout-btn");
         const boosterCountSpan = document.getElementById("booster-count");
         const openOgBoosterBtn = document.getElementById("open-og-booster");
-        const openPrBoosterBtn = document.getElementById("open-pr-booster");
+        const openPrBoosterBtn = document = document.getElementById("open-pr-booster");
         const boosterResultContainer = document.getElementById("booster-result");
         const lastBoosterSummary = document.getElementById("last-booster-summary");
         const lastBoosterCardsContainer = document.getElementById("last-booster-cards");
@@ -876,10 +876,10 @@
          */
         function selectShopCard(index) {
             const data = getData();
-            // Désélectionne la carte précédemment sélectionnée
-            if (data.selectedShopCard !== null && data.shopCards[data.selectedShopCard]) {
-                data.shopCards[data.selectedShopCard].isSelectedForPurchase = false;
-            }
+            // Désélectionne explicitement toutes les cartes avant de sélectionner la nouvelle
+            data.shopCards.forEach(card => {
+                card.isSelectedForPurchase = false;
+            });
 
             // Sélectionne la nouvelle carte
             data.selectedShopCard = index;
