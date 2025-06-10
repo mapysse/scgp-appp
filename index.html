@@ -394,7 +394,6 @@
             <button class="tab-btn active" id="booster-tab-btn">Booster</button>
             <button class="tab-btn" id="collection-tab-btn">Collection</button>
             <button class="tab-btn" id="shop-tab-btn">Boutique</button>
-            <button class="tab-btn" id="zid-tab-btn">Pour Zid</button> <!-- NOUVEAU BOUTON D'ONGLET -->
         </div>
 
         <main>
@@ -431,18 +430,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- NOUVELLE SECTION POUR ZID -->
-            <section id="zid-boosters" class="section">
-                <h3>Boosters Spéciaux pour Zid</h3>
-                <p>Boosters restants pour Zid : <span id="zid-booster-count"></span></p>
-                <button class="booster-btn" id="open-zid-og-booster">🎁 Ouvrir un booster OG (Zid)</button>
-                <button class="booster-btn" id="open-zid-pr-booster">🎁 Ouvrir un booster PR (Zid)</button>
-                <div id="zid-booster-result" class="card-container">
-                    <!-- Les résultats des boosters de Zid peuvent être affichés ici, mais l'overlay est privilégié -->
-                    <p>Cliquez sur un bouton pour ouvrir un des 27 boosters de Zid.</p>
-                </div>
-            </section>
         </main>
     </div>
 
@@ -465,7 +452,6 @@
         const SHOP_DAILY_CARD_COUNT = 5; // Nombre de cartes proposées chaque jour à la boutique
         const SHOP_NEW_CARD_CHANCE = 0.3; // 30% de chance d'avoir une carte non possédée
         const SHOP_TRADE_COST = 5; // Nombre de doublons requis pour un échange
-        const ZID_BOOSTER_LIMIT = 27; // NOUVELLE CONSTANTE POUR ZID
 
         // Date du jour pour réinitialisations
         const today = new Date().toDateString();
@@ -508,18 +494,10 @@
         const boosterTabBtn = document.getElementById("booster-tab-btn");
         const collectionTabBtn = document.getElementById("collection-tab-btn");
         const shopTabBtn = document.getElementById("shop-tab-btn");
-        const zidTabBtn = document.getElementById("zid-tab-btn"); // NOUVELLE RÉFÉRENCE DOM
-
-        // NOUVELLES RÉFÉRENCES DOM POUR ZID
-        const zidBoostersSection = document.getElementById("zid-boosters");
-        const zidBoosterCountSpan = document.getElementById("zid-booster-count");
-        const openZidOgBoosterBtn = document.getElementById("open-zid-og-booster");
-        const openZidPrBoosterBtn = document.getElementById("open-zid-pr-booster");
-        const zidBoosterResultContainer = document.getElementById("zid-booster-result");
 
         // Variables d'état du jeu (pour l'ouverture de booster)
         let boosterCardsToShow = [];
-        let boosterCardIndex = 0; // Pas strictement nécessaire si showBoosterPreview gère le cycle
+        let boosterCardIndex = 0;
 
         /**
          * @typedef {Object} CardData
@@ -566,11 +544,6 @@
                 data.shopCards = generateShopCardsInternal(data.collection); // Génère de nouvelles cartes pour la boutique
             }
 
-            // Initialisation spécifique pour les boosters de Zid (ne se réinitialise PAS quotidiennement)
-            if (data.zidRemainingBoosters === undefined) {
-                data.zidRemainingBoosters = ZID_BOOSTER_LIMIT;
-            }
-
             data.collection = data.collection || [];
             data.lastBooster = data.lastBooster || null;
             data.shopCards = data.shopCards || generateShopCardsInternal(data.collection); // Assure que les cartes boutique sont toujours là
@@ -598,25 +571,6 @@
             const data = getData();
             boosterCountSpan.textContent = data.remaining;
         }
-
-        /**
-         * Met à jour le compteur de boosters de Zid restants affiché et l'état des boutons.
-         */
-        function updateZidBoosterCount() {
-            const data = getData();
-            zidBoosterCountSpan.textContent = data.zidRemainingBoosters;
-
-            if (data.zidRemainingBoosters <= 0) {
-                openZidOgBoosterBtn.disabled = true;
-                openZidPrBoosterBtn.disabled = true;
-                zidBoosterResultContainer.innerHTML = "<p>Tous les boosters spéciaux de Zid ont été ouverts !</p>";
-            } else {
-                openZidOgBoosterBtn.disabled = false;
-                openZidPrBoosterBtn.disabled = false;
-                zidBoosterResultContainer.innerHTML = "<p>Cliquez sur un bouton pour ouvrir un des " + data.zidRemainingBoosters + " boosters de Zid.</p>";
-            }
-        }
-
 
         /**
          * Ouvre un booster d'une extension donnée.
@@ -664,48 +618,6 @@
         }
 
         /**
-         * Ouvre un booster spécifique pour Zid.
-         * @param {string} extension - L'extension du booster ('OG' ou 'PR').
-         */
-        function openZidBooster(extension) {
-            const data = getData();
-            if (data.zidRemainingBoosters <= 0) {
-                showMessage("Tous les boosters spéciaux de Zid ont déjà été ouverts !");
-                return;
-            }
-
-            const pool = extensions[extension];
-            boosterCardsToShow = []; // Réutilise la variable globale pour l'overlay
-
-            // Tirage aléatoire de cartes pour le booster
-            for (let i = 0; i < CARDS_PER_BOOSTER; i++) {
-                const image = pool[Math.floor(Math.random() * pool.length)];
-                boosterCardsToShow.push({ image, extension, isNew: false });
-            }
-
-            // Détection des nouvelles cartes et mise à jour de la collection
-            boosterCardsToShow.forEach(card => {
-                const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
-                if (existing) {
-                    existing.count = (existing.count || 1) + 1;
-                    card.isNew = false;
-                } else {
-                    data.collection.push({ image: card.image, extension: card.extension, count: 1 });
-                    card.isNew = true;
-                }
-            });
-
-            data.zidRemainingBoosters--; // Décrémente le compteur spécifique à Zid
-            saveData(data);
-            updateZidBoosterCount(); // Met à jour l'affichage des boosters de Zid
-
-            showBoosterPreview(); // Affiche l'animation d'ouverture
-            updateCollection(); // Met à jour la collection en arrière-plan
-            lastBoosterSummary.style.display = "none"; // Cache le résumé du booster quotidien si affiché
-        }
-
-
-        /**
          * Affiche l'animation d'ouverture de booster carte par carte.
          */
         function showBoosterPreview() {
@@ -738,8 +650,7 @@
                         showNextCard();
                     } else {
                         boosterPreviewOverlay.style.display = "none";
-                        // Ne pas montrer le résumé du dernier booster ici, car Zid n'en a pas besoin directement.
-                        // showLastBoosterSummary(); // Cette ligne a été supprimée
+                        showLastBoosterSummary(); // Affiche le résumé après toutes les cartes
                     }
                 };
             }
@@ -913,6 +824,12 @@
          */
         function updateShop() {
             const data = getData(); // S'assure que les données sont à jour (y compris shopDate et shopCards)
+
+            // IMPORTANT: Ne PAS réinitialiser data.selectedShopCard et data.selectedDuplicatesForShop ici
+            // Cela permet aux sélections de persister lors du rafraîchissement de la boutique.
+            // data.selectedShopCard = null; // Ces lignes ont été supprimées
+            // data.selectedDuplicatesForShop = []; // Ces lignes ont été supprimées
+            // saveData(data); // Et donc cette sauvegarde aussi
 
             dailyShopCardsContainer.innerHTML = "";
             duplicateSelectionContainer.innerHTML = "";
@@ -1135,7 +1052,7 @@
 
         /**
          * Change l'onglet actif.
-         * @param {string} tabName - Le nom de l'onglet à activer ('booster', 'collection', 'shop', 'zid').
+         * @param {string} tabName - Le nom de l'onglet à activer ('booster', 'collection', 'shop').
          */
         function switchTab(tabName) {
             const sections = document.querySelectorAll(".section");
@@ -1159,11 +1076,6 @@
                     shopTabBtn.classList.add("active");
                     updateShop(); // Mettre à jour la boutique à chaque fois qu'on y va
                     break;
-                case "zid": // NOUVEAU CAS POUR L'ONGLET ZID
-                    zidBoostersSection.classList.add("visible");
-                    zidTabBtn.classList.add("active");
-                    updateZidBoosterCount(); // Met à jour le compteur Zid quand l'onglet est actif
-                    break;
             }
         }
 
@@ -1186,7 +1098,6 @@
             showLastBoosterSummary();
             updateCollection();
             updateShop(); // S'assure que la boutique est à jour au login
-            updateZidBoosterCount(); // NOUVEAU : Met à jour le compteur Zid au login
             switchTab('booster'); // Défaut sur l'onglet booster après connexion
         }
 
@@ -1205,9 +1116,6 @@
             collectionExtensionsContainer.innerHTML = "";
             dailyShopCardsContainer.innerHTML = "";
             shopMessage.textContent = "";
-            // Réinitialisation de l'affichage pour Zid
-            zidBoosterResultContainer.innerHTML = "";
-            zidBoosterCountSpan.textContent = "";
         }
 
         // --- Initialisation des écouteurs d'événements ---
@@ -1219,14 +1127,7 @@
         boosterTabBtn.addEventListener("click", () => switchTab('booster'));
         collectionTabBtn.addEventListener("click", () => switchTab('collection'));
         shopTabBtn.addEventListener("click", () => switchTab('shop'));
-        zidTabBtn.addEventListener("click", () => switchTab('zid')); // NOUVEAU ÉCOUTEUR POUR L'ONGLET ZID
-
         buyShopCardBtn.addEventListener("click", buyShopCard);
-
-        // NOUVEAUX ÉCOUTEURS POUR LES BOUTONS DE ZID
-        openZidOgBoosterBtn.addEventListener("click", () => openZidBooster('OG'));
-        openZidPrBoosterBtn.addEventListener("click", () => openZidBooster('PR'));
-
 
         // Écouteur pour le bouton OK de la boîte de message
         messageBoxOkBtn.addEventListener("click", () => {
@@ -1239,9 +1140,9 @@
             loginSection.style.display = "flex";
             appSection.style.display = "none";
             logoutBtn.style.display = "none";
-            updateZidBoosterCount(); // Met à jour le compteur Zid initialement
         };
 
     </script>
 </body>
 </html>
+
