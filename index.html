@@ -466,7 +466,7 @@
         const logoutBtn = document.getElementById("logout-btn");
         const boosterCountSpan = document.getElementById("booster-count");
         const openOgBoosterBtn = document.getElementById("open-og-booster");
-        const openPrBoosterBtn = document.getElementById("open-pr-booster"); 
+        const openPrBoosterBtn = document.getElementById("open-pr-booster");
         const boosterResultContainer = document.getElementById("booster-result");
         const lastBoosterSummary = document.getElementById("last-booster-summary");
         const lastBoosterCardsContainer = document.getElementById("last-booster-cards");
@@ -651,7 +651,7 @@
                     } else {
                         boosterPreviewOverlay.style.display = "none";
                         // MODIFICATION ICI: Après l'animation, affiche les cartes dans le container principal
-                        displayBoosterResultCards(boosterCardsToShow); 
+                        displayBoosterResultCards(boosterCardsToShow);
                         showLastBoosterSummary(); // Affiche le résumé après toutes les cartes
                     }
                 };
@@ -807,10 +807,10 @@
         function generateShopCardsInternal(userCollection) {
             const allPossibleCards = [];
             // Cette boucle itère sur 'OG' et 'PR'
-            for (const ext in extensions) { 
+            for (const ext in extensions) {
                 extensions[ext].forEach(image => {
                     // Ajoute les cartes des deux extensions à la liste de toutes les cartes possibles
-                    allPossibleCards.push({ image, extension: ext }); 
+                    allPossibleCards.push({ image, extension: ext });
                 });
             }
 
@@ -955,7 +955,7 @@
                 // Calcule le nombre de doublons disponibles pour cette carte (total - 1)
                 const countBadge = document.createElement("div");
                 countBadge.className = "count-badge";
-                countBadge.textContent = `x${card.count - 1}`; 
+                countBadge.textContent = `x${card.count - 1}`;
                 cardDiv.appendChild(countBadge);
 
                 // Ajoute l'écouteur de clic pour sélectionner/désélectionner le doublon
