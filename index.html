@@ -403,7 +403,6 @@
                 <button class="booster-btn" id="open-pr-booster">🎁 Ouvrir un booster Extension PR</button>
                 <div id="booster-result" class="card-container"></div>
 
-                <!-- Résumé dernier booster -->
                 <div id="last-booster-summary" style="display:none;">
                     <h4>Résumé du dernier booster</h4>
                     <div class="card-container" id="last-booster-cards"></div>
@@ -419,25 +418,21 @@
                 <h3>Boutique</h3>
                 <p id="shop-message"></p>
                 <div id="daily-shop-cards" class="card-container">
-                    <!-- Les 5 cartes de la boutique seront affichées ici -->
-                </div>
+                    </div>
                 <button id="buy-shop-card-btn" disabled>Acheter la carte sélectionnée</button>
 
                 <div id="duplicate-selection-area">
                     <h5>Sélectionnez 5 doublons différents pour l'échange :</h5>
                     <div id="duplicate-selection-container" class="card-container">
-                        <!-- Les cartes doublons de l'utilisateur seront affichées ici -->
-                    </div>
+                        </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Overlay carte agrandie booster et collection -->
     <div id="booster-preview-overlay" style="display:none;"></div>
     <div id="full-card-overlay" class="overlay" style="display:none;"></div>
 
-    <!-- Message Box Overlay (remplace alert()) -->
     <div id="message-box-overlay">
         <div id="message-box">
             <p id="message-box-text"></p>
@@ -542,6 +537,8 @@
                 data.shopBoughtToday = false; // Réinitialise l'achat de la boutique
                 data.shopDate = today; // Met à jour la date de la boutique
                 data.shopCards = generateShopCardsInternal(data.collection); // Génère de nouvelles cartes pour la boutique
+                data.selectedShopCard = null; // Réinitialise la sélection de la carte boutique
+                data.selectedDuplicatesForShop = []; // Réinitialise les doublons sélectionnés
             }
 
             data.collection = data.collection || [];
@@ -587,6 +584,15 @@
             boosterCardsToShow = [];
             boosterCardIndex = 0;
 
+            // --- MODIFICATIONS ICI ---
+            // Vider le container de résultat du booster avant d'ouvrir un nouveau booster
+            boosterResultContainer.innerHTML = "";
+            boosterResultContainer.style.display = "flex"; // S'assurer qu'il est visible
+
+            // Cacher le résumé du dernier booster au début de l'ouverture d'un nouveau
+            lastBoosterSummary.style.display = "none";
+            // --- FIN MODIFICATIONS ---
+
             // Tirage aléatoire de cartes pour le booster
             for (let i = 0; i < CARDS_PER_BOOSTER; i++) {
                 const image = pool[Math.floor(Math.random() * pool.length)];
@@ -610,10 +616,8 @@
             saveData(data);
             updateBoosterCount();
 
-            showBoosterPreview();
+            showBoosterPreview(); // Lance l'animation carte par carte
 
-            // Cacher le résumé du dernier booster au début de l'ouverture d'un nouveau
-            lastBoosterSummary.style.display = "none";
             updateCollection(); // Mettre à jour la collection en arrière-plan
         }
 
@@ -650,12 +654,38 @@
                         showNextCard();
                     } else {
                         boosterPreviewOverlay.style.display = "none";
+                        // --- MODIFICATIONS ICI ---
+                        // Après l'animation, affiche les cartes dans le container principal
+                        displayBoosterResultCards(boosterCardsToShow);
+                        // --- FIN MODIFICATIONS ---
                         showLastBoosterSummary(); // Affiche le résumé après toutes les cartes
                     }
                 };
             }
 
             showNextCard(); // Commence l'affichage par la première carte
+        }
+
+        /**
+         * Affiche les cartes du booster dans le conteneur principal de résultat.
+         * @param {Array<CardData>} cards - Les cartes à afficher.
+         */
+        function displayBoosterResultCards(cards) {
+            boosterResultContainer.innerHTML = ""; // Vider le container avant d'ajouter les cartes
+            cards.forEach(card => {
+                const el = document.createElement("div");
+                el.className = "card";
+                el.style.backgroundImage = `url(${card.image})`;
+
+                if (card.isNew) {
+                    const star = document.createElement("div");
+                    star.textContent = "⭐";
+                    star.className = "star-emoji";
+                    el.appendChild(star);
+                }
+                boosterResultContainer.appendChild(el);
+            });
+            boosterResultContainer.style.display = "flex"; // S'assurer que le container est visible
         }
 
         /**
@@ -783,20 +813,20 @@
         function generateShopCardsInternal(userCollection) {
             const allPossibleCards = [];
             // Cette boucle itère sur 'OG' et 'PR'
-            for (const ext in extensions) { 
+            for (const ext in extensions) {
                 extensions[ext].forEach(image => {
                     // Ajoute les cartes des deux extensions à la liste de toutes les cartes possibles
-                    allPossibleCards.push({ image, extension: ext }); 
+                    allPossibleCards.push({ image, extension: ext });
                 });
             }
 
             const unownedCards = allPossibleCards.filter(card =>
                 !userCollection.some(c => c.image === card.image && c.extension === card.extension)
             );
-            const ownedCards = allPossibleCards.filter(card =>
-                userCollection.some(c => c.image === card.image && c.extension === card.extension)
-            );
-
+            // La logique de génération des cartes est un peu simplifiée ici
+            // par rapport à une version plus robuste qui garantirait des cartes uniques par jour,
+            // mais c'est suffisant pour l'exemple.
+            
             const dailyCards = [];
             for (let i = 0; i < SHOP_DAILY_CARD_COUNT; i++) {
                 let chosenCard;
@@ -824,12 +854,6 @@
          */
         function updateShop() {
             const data = getData(); // S'assure que les données sont à jour (y compris shopDate et shopCards)
-
-            // IMPORTANT: Ne PAS réinitialiser data.selectedShopCard et data.selectedDuplicatesForShop ici
-            // Cela permet aux sélections de persister lors du rafraîchissement de la boutique.
-            // data.selectedShopCard = null; // Ces lignes ont été supprimées
-            // data.selectedDuplicatesForShop = []; // Ces lignes ont été supprimées
-            // saveData(data); // Et donc cette sauvegarde aussi
 
             dailyShopCardsContainer.innerHTML = "";
             duplicateSelectionContainer.innerHTML = "";
@@ -931,7 +955,7 @@
                 // Calcule le nombre de doublons disponibles pour cette carte (total - 1)
                 const countBadge = document.createElement("div");
                 countBadge.className = "count-badge";
-                countBadge.textContent = `x${card.count - 1}`; 
+                countBadge.textContent = `x${card.count - 1}`;
                 cardDiv.appendChild(countBadge);
 
                 // Ajoute l'écouteur de clic pour sélectionner/désélectionner le doublon
