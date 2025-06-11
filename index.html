@@ -395,7 +395,13 @@
             <button class="tab-btn" onclick="switchTab('collection')">Collection</button>
             <button class="tab-btn" onclick="switchTab('shop')">Boutique</button>
         </div>
-
+        <div style="text-align:center; margin: 1rem 0;">
+            <button onclick="exportData()" style="margin-right: 1rem;">📤 Exporter mes données</button>
+            <label for="importFile" style="cursor: pointer; color: #2980b9; text-decoration: underline;">
+            📥 Importer mes données
+            </label>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importDataFromFile(this.files[0])">
+        </div>
         <main>
             <section id="booster" class="section visible">
                 <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
@@ -1162,7 +1168,59 @@
             appSection.style.display = "none";
             logoutBtn.style.display = "none";
         };
+function exportData() {
+    if (!currentCode) {
+        showMessage("Veuillez vous connecter avant d'exporter.");
+        return;
+    }
+    const key = getStorageKey();
+    const data = localStorage.getItem(key);
+    if (!data) {
+        showMessage("Aucune donnée trouvée à exporter.");
+        return;
+    }
 
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `souyette_data_${currentCode}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importDataFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const imported = JSON.parse(event.target.result);
+            if (!currentCode) {
+                showMessage("Connectez-vous d'abord avant d'importer.");
+                return;
+            }
+
+            // Vérification minimale
+            if (!imported.collection || !imported.date) {
+                showMessage("Fichier invalide ou incomplet.");
+                return;
+            }
+
+            localStorage.setItem(getStorageKey(), JSON.stringify(imported));
+            showMessage("Importation réussie !");
+            updateBoosterCount();
+            updateCollection();
+            updateShop();
+            showLastBoosterSummary();
+        } catch (err) {
+            showMessage("Erreur lors de l'importation. Fichier non valide.");
+        }
+    };
+    reader.readAsText(file);
+}
     </script>
 </body>
 </html>
+
