@@ -744,7 +744,7 @@
                     return getNumber(a) - getNumber(b);
                 });
 
-                const totalAvailable = ext === "OG" ? extensions.OG.length : ext === "PR" ? extensions.PR.length : ext === "TE" ? extensions.TE.lengt : 0;
+                const totalAvailable = ext === "OG" ? extensions.OG.length : ext === "PR" ? extensions.PR.length : ext === "TE" ? extensions.TE.length : 0;
                 const ownedUnique = new Set(cards.map(c => c.image)).size;
 
                 const extSection = document.createElement("div");
