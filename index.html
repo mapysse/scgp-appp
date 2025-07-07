@@ -498,7 +498,7 @@
         /**
          * @typedef {Object} CardData
          * @property {string} image - Chemin de l'image de la carte.
-         * @property {string} extension - Extension de la carte (ex: 'OG', 'PR').
+         * @property {string} extension - Extension de la carte (ex: 'OG', 'PR', 'TE').
          * @property {number} count - Nombre d'exemplaires de cette carte possédés.
          * @property {boolean} [isNew] - Indique si la carte est nouvelle (utilisé pour les boosters/boutique).
          * @property {boolean} [isSelectedForPurchase] - Indique si la carte de la boutique est sélectionnée pour achat.
@@ -744,7 +744,7 @@
                     return getNumber(a) - getNumber(b);
                 });
 
-                const totalAvailable = ext === "OG" ? extensions.OG.length : ext === "PR" ? extensions.PR.length : 0;
+                const totalAvailable = ext === "OG" ? extensions.OG.length : ext === "PR" ? extensions.PR.length : ext === "TE" ? extensions.TE.lengt : 0;
                 const ownedUnique = new Set(cards.map(c => c.image)).size;
 
                 const extSection = document.createElement("div");
