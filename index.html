@@ -129,9 +129,6 @@
             cursor: pointer; /* Le curseur sur l'enveloppe */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            /* Pour maintenir les proportions, on peut utiliser un padding-bottom */
-            padding-bottom: calc(140 / 100 * 30%); /* Ex: si 140px de haut pour 100px de large, pour 150px de large -> 1.4 * 150 = 210px de haut */
-            height: 0; /* Important si tu utilises padding-bottom */
         }
 
         .booster-wrapper:hover {
@@ -146,7 +143,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover; /* Assure que l'image couvre l'espace sans se déformer */
-            border-radius: 10px; /* Pour correspondre au wrapper */
         }
 
         /* Ensuite, applique la classe booster-shiny sur .booster-wrapper */
