@@ -73,83 +73,64 @@
             transform: translateY(-1px);
         }
         main {
-            padding: 1.5rem; /* Plus de padding */
-            max-width: 900px; /* Légèrement plus large */
-            margin: 1.5rem auto; /* Marge autour */
-            flex-grow: 1; /* Permet à main de prendre l'espace disponible */
-            background: white;
-            border-radius: 12px; /* Coins arrondis */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombre plus prononcée */
-        }
-        .booster-btn, #buy-shop-card-btn {
-            background: #e67e22;
-            color: white;
-            border: none;
-            padding: 1rem;
-            font-size: 1.1rem;
-            border-radius: 10px;
-            margin: 0.5rem 0;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: background 0.3s ease, transform 0.2s ease;
-        }
-        .booster-btn:hover, #buy-shop-card-btn:hover {
-            background: #d35400;
-            transform: translateY(-2px);
-        }
-        .booster-btn:disabled, #buy-shop-card-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-        .booster-buttons-container {
-            display: flex; /* Utilise Flexbox pour aligner les éléments sur une seule ligne */
-            justify-content: center; /* Centre les images horizontalement dans le conteneur */
-            align-items: flex-start; /* Aligne les éléments en haut (si leurs tailles varient) */
-            gap: 15px; /* Ajoute un espace de 15px entre les images */
-            flex-wrap: wrap; /* Permet aux images de passer à la ligne si l'écran est trop petit */
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            maxwidth: 100%;
-            margin-left: auto;
-            margin-right: auto;
-            padding-left: 15px;
-            padding-right:15px;
-            box-sizing: border-box;
-        }
-
-        .booster-image-btn {
-            width: calc((100% - (2 * 15px)) / 3);
-            max-width: 150px; /* Limite la largeur maximale pour éviter des images trop grandes */
-            height: auto; /* Maintient les proportions de l'image */
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .booster-image-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-        @media (max-width: 600px) {
-            .booster-image-btn {
-            width: calc((100% - 15px) / 2); /* 2 images par ligne sur petits écrans */
-            }
-        }
-
-        @media (max-width: 400px) {
-            .booster-image-btn {
-                width: 100%; /* 1 image par ligne sur très petits écrans */
-                max-width: 200px; /* Limiter la taille pour ne pas qu'elles soient trop grandes */
-            }
-            .booster-buttons-container {
-                flex-direction: column; /* Empile les images verticalement */
-                align-items: center; /* Centre les images empilées */
-            }
-        }
-
+            padding: 1.5rem; /* Plus de padding */
+            max-width: 900px; /* Légèrement plus large */
+            margin: 1.5rem auto; /* Marge autour */
+            flex-grow: 1; /* Permet à main de prendre l'espace disponible */
+            background: white;
+            border-radius: 12px; /* Coins arrondis */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombre plus prononcée */
+        }
+        .booster-btn, #buy-shop-card-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            margin: 0.5rem 0;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .booster-btn:hover, #buy-shop-card-btn:hover {
+            background: #d35400;
+            transform: translateY(-2px);
+        }
+        .booster-btn:disabled, #buy-shop-card-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .booster-buttons-container {
+            display: flex; /* Utilise Flexbox pour aligner les éléments sur une seule ligne */
+            justify-content: center; /* Centre les images horizontalement dans le conteneur */
+            align-items: flex-start; /* Aligne les éléments en haut (si leurs tailles varient) */
+            gap: 15px; /* Ajoute un espace de 15px entre les images */
+            flex-wrap: wrap; /* Permet aux images de passer à la ligne si l'écran est trop petit */
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            max-width: 90vw;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 15px;
+            padding-right:15px;
+            box-sizing: border-box;
+        }
+        .booster-image-btn {
+            width: 30%; /* Chaque image prendra environ 30% de la largeur du conteneur */
+            max-width: 150px; /* Limite la largeur maximale pour éviter des images trop grandes */
+            height: auto; /* Maintient les proportions de l'image */
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .booster-image-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
         /* Effet brillant pour les cartes */
         .card.shiny-card {
             position: relative;
