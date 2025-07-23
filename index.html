@@ -123,12 +123,11 @@
         .booster-wrapper {
             width: 30%; /* Garde la même logique de largeur */
             max-width: 150px; /* Limite la largeur maximale */
-            /* Pas besoin de height: auto ici, on le gérera sur l'image */
+            height: auto;/* Pas besoin de height: auto ici, on le gérera sur l'image */
             position: relative; /* Indispensable pour positionner le ::before */
             overflow: hidden; /* Cache l'excédent du ::before */
             cursor: pointer; /* Le curseur sur l'enveloppe */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 10px; /* Ajoute un border-radius pour que l'effet shine soit contenu */
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             /* Pour maintenir les proportions, on peut utiliser un padding-bottom */
             padding-bottom: calc(140 / 100 * 30%); /* Ex: si 140px de haut pour 100px de large, pour 150px de large -> 1.4 * 150 = 210px de haut */
