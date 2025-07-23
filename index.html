@@ -119,12 +119,13 @@
             background: linear-gradient(
                 to right,
                 rgba(255, 255, 255, 0) 0%,
-                rgba(255, 200, 200, 0.4) 15%,
-                rgba(200, 200, 255, 0.6) 20%,
-                rgba(200, 255, 200, 0.7) 35%, /* Léger début de reflet */
-                rgba(200, 255, 255, 0.8) 50%, /* Point le plus lumineux */
-                rgba(200, 150, 150, 0.6) 70%,
-                rgba(150, 255, 150, 0.4) 80%,
+                rgba(255, 200, 200, 0.1) 10%, /* Rendu plus transparent et commencé un peu plus tôt */
+                rgba(200, 200, 255, 0.3) 20%, /* Opacité réduite */
+                rgba(200, 255, 200, 0.5) 35%, /* Opacité réduite */
+                rgba(200, 255, 255, 0.8) 50%, /* Point le plus lumineux (inchangé pour le pic) */
+                rgba(200, 150, 150, 0.5) 65%, /* Opacité réduite */
+                rgba(150, 255, 150, 0.3) 80%, /* Opacité réduite */
+                rgba(255, 255, 255, 0.1) 90%, /* Ajout d'une lueur très faible plus loin */
                 rgba(255, 255, 255, 0) 100%
             );
             transform: rotate(45deg); /* Incline le reflet */
