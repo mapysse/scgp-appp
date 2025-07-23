@@ -104,6 +104,17 @@
             box-shadow: none;
             transform: none;
         }
+        /* Effet brillant pour les cartes */
+        .card.shiny-card {
+            box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7); /* Une ombre dorée */
+            border: 2px solid gold; /* Une petite bordure dorée */
+        }
+        /* Optionnel: Améliorer l'effet au survol */
+        .card.shiny-card:hover {
+            box-shadow: 0 0 25px 8px rgba(255, 215, 0, 0.9);
+            transform: translateY(-7px) scale(1.03); /* Effet plus prononcé au survol */
+        }
+    
         .card-container {
             display: flex;
             flex-wrap: wrap;
@@ -467,6 +478,27 @@
             TE: Array.from({ length: 65 }, (_, i) => `images/TE/${String(i + 1).padStart(3, '0')}.jpg`),
         };
 
+        // Liste des chemins d'images des cartes brillantes
+        const SHINY_CARDS_PATHS = [];
+
+        // images/OG/120.jpg à 125.jpg
+        for (let i = 120; i <= 125; i++) {
+            SHINY_CARDS_PATHS.push(`images/OG/${String(i).padStart(3, '0')}.jpg`);
+        }
+
+        // images/PR/035.jpg
+            SHINY_CARDS_PATHS.push("images/PR/035.jpg");
+
+        // images/PR/062.jpg à 065.jpg
+        for (let i = 62; i <= 65; i++) {
+            SHINY_CARDS_PATHS.push(`images/PR/${String(i).padStart(3, '0')}.jpg`);
+        }
+
+        // images/TE/064.jpg à 065.jpg
+        for (let i = 64; i <= 65; i++) {
+            SHINY_CARDS_PATHS.push(`images/TE/${String(i).padStart(3, '0')}.jpg`);
+        }
+
         // Références aux éléments DOM
         const loginSection = document.getElementById("login");
         const appSection = document.getElementById("app");
@@ -642,6 +674,9 @@
                 const el = document.createElement("div");
                 el.className = "card";
                 el.style.backgroundImage = `url(${card.image})`;
+                if (SHINY_CARDS_PATHS.includes(cardData.image)) {
+                    el.classList.add("shiny-card");
+                }
                 if (card.isNew) {
                     const star = document.createElement("div");
                     star.textContent = "⭐";
@@ -676,7 +711,9 @@
                 const el = document.createElement("div");
                 el.className = "card";
                 el.style.backgroundImage = `url(${card.image})`;
-
+                if (SHINY_CARDS_PATHS.includes(card.image)) {
+                    el.classList.add("shiny-card");
+                }
                 if (card.isNew) {
                     const star = document.createElement("div");
                     star.textContent = "⭐";
@@ -707,7 +744,9 @@
                 const el = document.createElement("div");
                 el.className = "card";
                 el.style.backgroundImage = `url(${card.image})`;
-
+                if (SHINY_CARDS_PATHS.includes(card.image)) {
+                   cardEl.classList.add("shiny-card");
+                }
                 if (card.isNew) {
                     const star = document.createElement("div");
                     star.textContent = "⭐";
@@ -758,6 +797,9 @@
                     const cardDiv = document.createElement("div");
                     cardDiv.className = "card";
                     cardDiv.style.backgroundImage = `url(${card.image})`;
+                    if (SHINY_CARDS_PATHS.includes(card.image)) {
+                        cardDiv.classList.add("shiny-card");
+                    }
 
                     if (card.count > 1) {
                         const countBadge = document.createElement("div");
@@ -792,7 +834,13 @@
             const card = document.createElement("div");
             card.className = "card expanded";
             card.style.backgroundImage = `url(${image})`;
-
+            if (SHINY_CARDS_PATHS.includes(image)) {
+                card.classList.add("shiny-card");
+            } else {
+                // IMPORTANT: Si la carte n'est PAS brillante, assurez-vous de retirer la classe.
+                // C'est crucial car l'overlay est réutilisé.
+                card.classList.remove("shiny-card");
+            }
             if (count !== undefined && count > 1) { // Affiche le count badge si présent et > 1
                 const countBadge = document.createElement("div");
                 countBadge.className = "count-badge";
@@ -883,7 +931,9 @@
                 const isSelected = data.selectedShopCard !== null && data.selectedShopCard === index;
                 cardDiv.className = `card ${isSelected ? 'selected-for-purchase' : ''}`;
                 cardDiv.style.backgroundImage = `url(${card.image})`;
-
+                if (SHINY_CARDS_PATHS.includes(card.image)) {
+                    cardEl.classList.add("shiny-card");
+                }
                 if (card.isNew) {
                     const star = document.createElement("div");
                     star.textContent = "⭐";
@@ -955,7 +1005,9 @@
                 );
                 cardDiv.className = `card ${isSelected ? 'selected-duplicate' : ''}`;
                 cardDiv.style.backgroundImage = `url(${card.image})`;
-
+                 if (SHINY_CARDS_PATHS.includes(card.image)) {
+                    cardDiv.classList.add("shiny-card");
+                }
                 // Calcule le nombre de doublons disponibles pour cette carte (total - 1)
                 const countBadge = document.createElement("div");
                 countBadge.className = "count-badge";
