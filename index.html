@@ -703,7 +703,7 @@
                 const el = document.createElement("div");
                 el.className = "card";
                 el.style.backgroundImage = `url(${card.image})`;
-                if (SHINY_CARDS_PATHS.includes(cardData.image)) {
+                if (SHINY_CARDS_PATHS.includes(card.image)) {
                     el.classList.add("shiny-card");
                 }
                 if (card.isNew) {
