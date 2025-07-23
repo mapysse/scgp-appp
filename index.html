@@ -123,7 +123,6 @@
         .booster-wrapper {
             width: 30%; /* Garde la même logique de largeur */
             max-width: 150px; /* Limite la largeur maximale */
-            height: auto;/* Pas besoin de height: auto ici, on le gérera sur l'image */
             position: relative; /* Indispensable pour positionner le ::before */
             overflow: hidden; /* Cache l'excédent du ::before */
             cursor: pointer; /* Le curseur sur l'enveloppe */
@@ -146,7 +145,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover; /* Assure que l'image couvre l'espace sans se déformer */
-            border-radius: 10px; /* Pour correspondre au wrapper */
         }
 
         /* Ensuite, applique la classe booster-shiny sur .booster-wrapper */
