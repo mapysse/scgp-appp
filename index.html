@@ -104,6 +104,31 @@
             box-shadow: none;
             transform: none;
         }
+        .booster-buttons-container {
+            display: flex; /* Utilise Flexbox pour aligner les éléments sur une seule ligne */
+            justify-content: center; /* Centre les images horizontalement dans le conteneur */
+            align-items: flex-start; /* Aligne les éléments en haut (si leurs tailles varient) */
+            gap: 15px; /* Ajoute un espace de 15px entre les images */
+            flex-wrap: wrap; /* Permet aux images de passer à la ligne si l'écran est trop petit */
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .booster-image-btn {
+            width: 30%; /* Chaque image prendra environ 30% de la largeur du conteneur */
+            max-width: 150px; /* Limite la largeur maximale pour éviter des images trop grandes */
+            height: auto; /* Maintient les proportions de l'image */
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .booster-image-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
         /* Effet brillant pour les cartes */
         .card.shiny-card {
             position: relative;
@@ -443,19 +468,19 @@
             <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importDataFromFile(this.files[0])">
         </div>
         <main>
-            <section id="booster" class="section visible">
-                <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
-                <p>🔔 N'oubliez pas d'ajouter un rappel à 00h sur votre téléphone pour penser à ouvrir vos boosters !</p>
-                <button class="booster-btn" onclick="openBooster('OG')">🎁 Ouvrir un booster Extension OG</button>
-                <button class="booster-btn" onclick="openBooster('PR')">🎁 Ouvrir un booster Extension PR</button>
-                <button class="booster-btn" onclick="openBooster('TE')">🎁 Ouvrir un booster Extension TE</button>
-                <div id="booster-result" class="card-container"></div>
+        <section id="booster" class="section visible">
+            <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
+            <p>🔔 N'oubliez pas d'ajouter un rappel à 00h sur votre téléphone pour penser à ouvrir vos boosters !</p>
+            <img src="images/booster_OG.png" alt="Ouvrir un booster Extension OG" class="booster-image-btn" onclick="openBooster('OG')">
+            <img src="images/booster_PR.png" alt="Ouvrir un booster Extension PR" class="booster-image-btn" onclick="openBooster('PR')">
+            <img src="images/booster_TE.png" alt="Ouvrir un booster Extension TE" class="booster-image-btn" onclick="openBooster('TE')">
+            <div id="booster-result" class="card-container"></div>
 
-                <div id="last-booster-summary" style="display:none;">
-                    <h4>Résumé du dernier booster</h4>
-                    <div class="card-container" id="last-booster-cards"></div>
-                </div>
-            </section>
+            <div id="last-booster-summary" style="display:none;">
+                <h4>Résumé du dernier booster</h4>
+                <div class="card-container" id="last-booster-cards"></div>
+            </div>
+        </section>
 
             <section id="collection" class="section">
                 <h3>Votre Collection</h3>
