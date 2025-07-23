@@ -112,7 +112,7 @@
             flex-wrap: wrap; /* Permet aux images de passer à la ligne si l'écran est trop petit */
             margin-top: 1rem;
             margin-bottom: 1rem;
-            max-width: 90vw;
+            maxwidth: 100%;
             margin-left: auto;
             margin-right: auto;
             padding-left: 15px;
@@ -121,7 +121,7 @@
         }
 
         .booster-image-btn {
-            width: 30%; /* Chaque image prendra environ 30% de la largeur du conteneur */
+            width: calc((100% - (2 * 15px)) / 3);
             max-width: 150px; /* Limite la largeur maximale pour éviter des images trop grandes */
             height: auto; /* Maintient les proportions de l'image */
             cursor: pointer;
@@ -132,6 +132,22 @@
         .booster-image-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        @media (max-width: 600px) {
+            .booster-image-btn {
+            width: calc((100% - 15px) / 2); /* 2 images par ligne sur petits écrans */
+            }
+        }
+
+        @media (max-width: 400px) {
+            .booster-image-btn {
+                width: 100%; /* 1 image par ligne sur très petits écrans */
+                max-width: 200px; /* Limiter la taille pour ne pas qu'elles soient trop grandes */
+            }
+            .booster-buttons-container {
+                flex-direction: column; /* Empile les images verticalement */
+                align-items: center; /* Centre les images empilées */
+            }
         }
 
         /* Effet brillant pour les cartes */
