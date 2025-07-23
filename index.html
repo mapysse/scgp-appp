@@ -121,7 +121,7 @@
         }
 
         .booster-image-btn {
-            width: 30%; /* Chaque image prendra environ 30% de la largeur du conteneur */
+            width: 32%; /* Chaque image prendra environ 30% de la largeur du conteneur */
             max-width: 150px; /* Limite la largeur maximale pour éviter des images trop grandes */
             height: auto; /* Maintient les proportions de l'image */
             cursor: pointer;
@@ -172,6 +172,29 @@
             transform: translateY(-5px) scale(1.02); /* Effet au survol de la carte */
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Vous pouvez conserver une ombre au survol si vous voulez */
         }
+       
+         /* Nouvelle classe pour les boosters */
+        .booster-shiny {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .booster-shiny::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%; /* Démarrage plus à gauche */
+            width: 70%; /* Balayage plus large */
+            height: 100%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%); /* Plus opaque */
+            transform: skewX(-30deg); /* Angle plus prononcé */
+            animation: booster-shiny-sweep 3s infinite; /* Animation plus lente (3s au lieu de 2s) */
+        }
+
+        @keyframes booster-shiny-sweep {
+            0% { transform: skewX(-30deg) translateX(0); }
+            100% { transform: skewX(-30deg) translateX(250%); } /* Se déplace plus loin */
+}
     
         .card-container {
             display: flex;
@@ -476,9 +499,9 @@
             <p>Boosters restants aujourd'hui : <span id="booster-count">3</span></p>
             <p>🔔 N'oubliez pas d'ajouter un rappel à 00h sur votre téléphone pour penser à ouvrir vos boosters !</p>
             <div class="booster-buttons-container">
-                <img src="images/booster_OG.jpg" alt="Ouvrir un booster Extension OG" class="booster-image-btn" onclick="openBooster('OG')">
-                <img src="images/booster_PR.jpg" alt="Ouvrir un booster Extension PR" class="booster-image-btn" onclick="openBooster('PR')">
-                <img src="images/booster_TE.jpg" alt="Ouvrir un booster Extension TE" class="booster-image-btn" onclick="openBooster('TE')">
+                <img src="images/booster_OG.jpg" alt="Ouvrir un booster Extension OG" class="booster-image-btn booster-shiny" onclick="openBooster('OG')">
+                <img src="images/booster_PR.jpg" alt="Ouvrir un booster Extension PR" class="booster-image-btn booster-shiny" onclick="openBooster('PR')">
+                <img src="images/booster_TE.jpg" alt="Ouvrir un booster Extension TE" class="booster-image-btn booster-shiny" onclick="openBooster('TE')">
             </div>
             <div id="booster-result" class="card-container"></div>
 
