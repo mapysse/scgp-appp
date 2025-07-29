@@ -29,460 +29,507 @@
             right: 1rem;
             top: 1rem;
             background: #FFFFFF;
-            color: white;
+            color: #2c3e50; /* Couleur du texte du bouton */
             border: none;
             padding: 0.4rem 0.8rem;
             border-radius: 8px; /* Coins plus arrondis */
             cursor: pointer;
             font-size: 0.9rem;
             display: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: background 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease, transform 0.2s ease;
         }
         #logout-btn:hover {
-            background: #FFFFFF;
+            background: #e0e0e0;
+            transform: translateY(-2px);
         }
         .tabs {
             display: flex;
             justify-content: center;
-            background: #ecf0f1;
-            padding: 0.5rem;
-            border-bottom: 1px solid #bdc3c7;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+            padding: 0.5rem 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
         }
         .tab-btn {
-            padding: 0.7rem 1.2rem; /* Plus de padding */
-            margin: 0 0.5rem;
+            background: none;
             border: none;
-            border-radius: 8px; /* Coins plus arrondis */
-            background: #FFFFFF;
-            color: #333;
+            padding: 0.8rem 1.5rem;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            font-weight: 500;
+            color: #555;
+            transition: color 0.3s ease, background 0.3s ease;
+            border-radius: 5px;
+            margin: 0 5px;
         }
         .tab-btn:hover {
-            background: #aab0b4;
-            transform: translateY(-2px);
+            color: #2c3e50;
+            background: #eee;
         }
         .tab-btn.active {
+            color: white;
             background: #3498db;
-            color: white;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
+
         main {
-            padding: 1.5rem; /* Plus de padding */
-            max-width: 900px; /* Légèrement plus large */
-            margin: 1.5rem auto; /* Marge autour */
-            flex-grow: 1; /* Permet à main de prendre l'espace disponible */
-            background: white;
-            border-radius: 12px; /* Coins arrondis */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombre plus prononcée */
-        }
-        .booster-btn, #buy-shop-card-btn {
-            background: #e67e22;
-            color: white;
-            border: none;
+            flex-grow: 1; /* Prend l'espace restant */
             padding: 1rem;
-            font-size: 1.1rem;
-            border-radius: 10px;
-            margin: 0.5rem 0;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: background 0.3s ease, transform 0.2s ease;
-        }
-        .booster-btn:hover, #buy-shop-card-btn:hover {
-            background: #d35400;
-            transform: translateY(-2px);
-        }
-        .booster-btn:disabled, #buy-shop-card-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-        .booster-buttons-container {
-            display: flex; /* Utilise Flexbox pour aligner les éléments sur une seule ligne */
-            justify-content: center; /* Centre les images horizontalement dans le conteneur */
-            align-items: flex-start; /* Aligne les éléments en haut (si leurs tailles varient) */
-            gap: 15px; /* Ajoute un espace de 15px entre les images */
-            flex-wrap: wrap; /* Permet aux images de passer à la ligne si l'écran est trop petit */
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            max-width: 90vw;
-            margin-left: auto;
-            margin-right: auto;
-            padding-left: 15px;
-            padding-right:15px;
-            box-sizing: border-box;
-        }
-
-        .booster-wrapper {
-            width: 30%; /* Garde la même logique de largeur */
-            max-width: 150px; /* Limite la largeur maximale */
-            height: auto;
-            position: relative; /* Indispensable pour positionner le ::before */
-            overflow: hidden; /* Cache l'excédent du ::before */
-            cursor: pointer; /* Le curseur sur l'enveloppe */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .booster-wrapper:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .booster-image-actual {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        /* Ensuite, applique la classe booster-shiny sur .booster-wrapper */
-        .booster-wrapper.booster-shiny::before {
-            /* Garde le CSS de ::before tel quel */
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                to right,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.1) 10%,
-                rgba(255, 255, 255, 0.3) 20%,
-                rgba(255, 255, 255, 0.5) 35%,
-                rgba(255, 255, 255, 0.8) 50%,
-                rgba(255, 255, 255, 0.5) 65%,
-                rgba(255, 255, 255, 0.3) 80%,
-                rgba(255, 255, 255, 0.1) 90%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: rotate(45deg);
-            animation: shiny-sweep 5s infinite cubic-bezier(0.25, 0.1, 0.25, 1);
-            pointer-events: none;
-            z-index: 1; /* Assure qu'il est au-dessus de l'image de fond */
-        }
-        /* Effet brillant pour les cartes */
-        .card.shiny-card {
-            position: relative;
-            overflow: hidden;
-        }
-        .card.shiny-card::before {
-            content: '';
-            position: absolute;
-            top: -50%; /* Commence le reflet en dehors de la carte */
-            left: -50%;
-            width: 200%; /* Largeur du reflet */
-            height: 200%; /* Hauteur du reflet */
-            background: linear-gradient(
-                to right,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 200, 200, 0.1) 10%, /* Rendu plus transparent et commencé un peu plus tôt */
-                rgba(200, 200, 255, 0.3) 20%, /* Opacité réduite */
-                rgba(200, 255, 200, 0.5) 35%, /* Opacité réduite */
-                rgba(200, 255, 255, 0.8) 50%, /* Point le plus lumineux (inchangé pour le pic) */
-                rgba(200, 150, 150, 0.5) 65%, /* Opacité réduite */
-                rgba(150, 255, 150, 0.3) 80%, /* Opacité réduite */
-                rgba(255, 255, 255, 0.1) 90%, /* Ajout d'une lueur très faible plus loin */
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: rotate(45deg); /* Incline le reflet */
-            animation: shiny-sweep 2s infinite cubic-bezier(0.25, 0.1, 0.25, 1); /* Anime le reflet */
-            pointer-events: none; /* Permet les interactions avec la carte sous le reflet */
-        }
-
-        @keyframes shiny-sweep {
-            0% { transform: rotate(45deg) translate(-100%, -100%); opacity: 0; }
-            10% { opacity: 1; } /* Apparaît rapidement */
-            90% { opacity: 0.8; } /* Reste visible pendant le balayage */
-            100% { transform: rotate(45deg) translate(100%, 100%); opacity: 0; } /* Disparaît */
-        }
-        .card.shiny-card:hover {
-            transform: translateY(-5px) scale(1.02); /* Effet au survol de la carte */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Vous pouvez conserver une ombre au survol si vous voulez */
-        }
-       
-         /* Nouvelle classe pour les boosters */
-        .booster-shiny {
-            position: relative; /* Crucial for positioning the pseudo-element */
-            overflow: hidden; /* Ensures the shiny effect stays within the booster image */
-        }
-
-        .booster-shiny::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                to right,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.1) 10%,
-                rgba(255, 255, 255, 0.3) 20%,
-                rgba(255, 255, 255, 0.5) 35%,
-                rgba(255, 255, 255, 0.8) 50%,
-                rgba(255, 255, 255, 0.5) 65%,
-                rgba(255, 255, 255, 0.3) 80%,
-                rgba(255, 255, 255, 0.1) 90%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: rotate(45deg);
-            animation: shiny-sweep 5s infinite cubic-bezier(0.25, 0.1, 0.25, 1);
-            pointer-events: none;
-        }
-
-        @keyframes shiny-sweep {
-            0% { transform: rotate(45deg) translate(-100%, -100%); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 0.8; }
-            100% { transform: rotate(45deg) translate(100%, 100%); opacity: 0; }
-        }
-        .card-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 1.2rem; /* Espace plus grand entre les cartes */
             justify-content: center;
-            margin-top: 1.5rem;
+            align-items: flex-start; /* Aligne le contenu en haut */
         }
-        .card {
-            width: 100px;
-            height: 140px;
-            border-radius: 10px;
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre plus douce */
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.2s ease;
-            overflow: hidden; /* Pour que l'étoile ne dépasse pas */
-        }
-        .card:hover {
-            transform: translateY(-5px) scale(1.02); /* Effet au survol */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-        .count-badge {
-            position: absolute;
-            bottom: 6px;
-            right: 6px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            pointer-events: none; /* Ne bloque pas les clics sur la carte */
-        }
+
         .section {
-            display: none;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px; /* Largeur maximale pour le contenu principal */
+            margin: 0 auto; /* Centrer le bloc */
+            display: none; /* Masqué par défaut, géré par JS */
         }
-        .visible {
+        .section.active {
             display: block;
         }
+        
         #login {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 3rem; /* Plus de padding */
-            max-width: 400px;
-            margin: 5rem auto;
+            justify-content: center;
+            min-height: 80vh; /* Pour centrer le formulaire sur la page de connexion */
+            text-align: center;
+        }
+        #login-form {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
         }
-        #login h2 {
-            color: #2c3e50;
+        #login-form h2 {
             margin-bottom: 1.5rem;
+            color: #333;
         }
-        #login p {
+        #user-code {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
             text-align: center;
-            margin-bottom: 1.5rem;
-            color: #e74c3c;
-            font-weight: bold;
         }
-        #login input {
-            font-size: 1.3rem; /* Plus grande taille */
-            padding: 0.8rem; /* Plus de padding */
-            width: 180px; /* Plus large */
-            text-align: center;
-            margin-bottom: 1.5rem;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-        #login input:focus {
-            border-color: #3498db;
-        }
-        #login button {
-            font-size: 1.2rem; /* Plus grande taille */
-            padding: 0.8rem 1.5rem; /* Plus de padding */
-            background: #27ae60;
+        #login-btn {
+            background: #3498db;
             color: white;
             border: none;
-            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 1.1rem;
+            width: 100%;
             transition: background 0.3s ease, transform 0.2s ease;
         }
-        #login button:hover {
-            background: #229a53;
+        #login-btn:hover {
+            background: #2980b9;
             transform: translateY(-2px);
         }
-        /* Carte agrandie lors de l'ouverture du booster et pour les overlays */
-        #booster-preview-overlay, .overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.8); /* Fond plus sombre */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            flex-direction: column;
-            animation: fadeIn 0.3s ease-out; /* Animation d'apparition */
+        
+        h2 {
+            color: #333;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
-        #booster-preview-overlay .card, .overlay .card.expanded {
-            width: 300px;
-            height: 420px;
-            border-radius: 15px;
+
+        .booster-section {
+            text-align: center;
+        }
+
+        .booster-section p {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .booster-buttons-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Permet aux boosters de passer à la ligne */
+            gap: 20px; /* Espace entre les boosters */
+            margin-top: 20px;
+        }
+
+        .booster-wrapper {
+            width: 150px; /* Taille fixe pour le booster */
+            height: 200px; /* Hauteur fixe pour le booster */
+            perspective: 1000px; /* Pour l'effet 3D au survol */
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .booster-wrapper:hover {
+            transform: translateY(-5px); /* Léger soulèvement au survol */
+        }
+
+        .booster-image-actual {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.5s ease; /* Pour l'effet 3D */
+            transform-style: preserve-3d;
+        }
+
+        .booster-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .booster-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        .booster-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Styles pour l'overlay de prévisualisation des boosters */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none; /* Masqué par défaut */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #booster-preview-overlay .card {
+            width: 250px; /* Taille des cartes dans l'animation d'ouverture */
+            height: 350px;
+            margin: 0 10px;
             background-size: cover;
             background-position: center;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.8); /* Ombre plus forte */
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px); /* Légèrement en dessous pour l'animation */
+            opacity: 0;
             cursor: pointer;
-            transform-origin: center center;
-            transform: none;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            animation: cardPop 0.4s ease-out; /* Animation d'apparition de la carte */
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+            position: relative; /* Pour le badge et l'étoile */
         }
-        #booster-preview-overlay .count-badge, .overlay .count-badge {
-            bottom: 10px;
-            right: 10px;
-            font-size: 1.2rem;
-            padding: 6px 10px;
-            border-radius: 12px;
-            position: absolute;
-            background: rgba(0,0,0,0.7);
-            color: white;
+
+        #booster-preview-overlay .card.show {
+            transform: translateY(0);
+            opacity: 1;
         }
-        #last-booster-summary {
-            margin-top: 2rem; /* Plus de marge */
+
+        #booster-result-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        #booster-result-container h3 {
             text-align: center;
-            padding: 1.5rem;
-            background: #f8f8f8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        #last-booster-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        #last-booster-summary h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px; /* Espacement entre les cartes */
+            justify-content: center;
+        }
+
+        .card {
+            width: 120px; /* Taille standard des cartes dans la collection */
+            height: 170px;
+            background-size: cover;
+            background-position: center;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative; /* Pour le badge et l'étoile */
         }
-        #last-booster-summary h4 {
-            margin-bottom: 1rem;
-            color: #34495e;
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
         }
-        #last-booster-summary .card-container .card {
-            width: 100px;
-            height: 140px;
-            position: relative;
-            transform: scale(1);
-            cursor: default;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+        .count-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 6px;
+            border-radius: 50%; /* Cercle */
+            min-width: 15px; /* Pour un chiffre unique */
+            text-align: center;
+            line-height: 15px; /* Centrer verticalement */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
         }
+
         .star-emoji {
             position: absolute;
-            bottom: 2px; /* Ajusté pour être dans la carte */
+            bottom: 5px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 1.5rem;
-            color: gold;
-            pointer-events: none;
-            text-shadow: 0 0 5px rgba(255, 223, 0, 0.8); /* Ombre pour l'étoile */
+            font-size: 1.5rem; /* Taille de l'étoile */
+            text-shadow: 0 0 5px rgba(255, 255, 0, 0.7); /* Effet brillant */
+            display: none; /* Affiché par JS pour les nouvelles cartes */
         }
-        /* Style pour la boutique */
+
+        /* Styles pour l'overlay de la carte agrandie */
+        #full-card-overlay .card.expanded {
+            width: 300px; /* Taille de la carte agrandie */
+            height: 420px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            cursor: default; /* Plus de curseur de pointeur */
+            transform: scale(1); /* Réinitialise le transform pour la transition de slide */
+            transition: transform 0.3s ease-in-out; /* Pour l'animation de slide */
+        }
+        #full-card-overlay .card.expanded img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 15px; /* S'assurer que l'image a les coins arrondis */
+            display: block; /* Supprime l'espace sous l'image */
+        }
+        #full-card-overlay .card.expanded .count-badge {
+            font-size: 1rem;
+            padding: 5px 10px;
+            min-width: 20px;
+            line-height: 20px;
+        }
+
+        /* Effet "Shiny" */
+        .card.shiny-card::before, .booster-wrapper.shiny::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.2) 30%,
+                rgba(255, 255, 255, 0.5) 50%,
+                rgba(255, 255, 255, 0.2) 70%,
+                transparent 100%
+            );
+            transform: translateX(-100%); /* Commence hors de vue à gauche */
+            animation: shiny-sweep 2.5s infinite linear; /* Anime le balayage */
+            mix-blend-mode: screen; /* Pour que l'effet se mélange bien avec l'image */
+            pointer-events: none; /* Pour ne pas interférer avec les clics */
+            border-radius: 10px; /* Pour correspondre au bord de la carte/booster */
+        }
+
+        /* Keyframe pour l'animation du balayage brillant */
+        @keyframes shiny-sweep {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Animations de slide pour la carte agrandie */
+        /* Ces classes seront ajoutées/retirées par JS */
+        .slide-enter-active, .slide-leave-active {
+            transition: transform 0.3s ease-in-out;
+        }
+        .slide-enter-from-right {
+            transform: translateX(100%);
+        }
+        .slide-leave-to-left {
+            transform: translateX(-100%);
+        }
+        .slide-enter-from-left {
+            transform: translateX(-100%);
+        }
+        .slide-leave-to-right {
+            transform: translateX(100%);
+        }
+
+
+        /* Collection spécifique */
+        .extension-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+        }
+        .extension-section h3 {
+            text-align: center;
+            margin-top: 0;
+            color: #444;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+
+        /* Shop */
         #shop-message {
             text-align: center;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            color: #34495e;
-            font-weight: bold;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #666;
         }
         #daily-shop-cards {
             display: flex;
             flex-wrap: wrap;
-            gap: 1.5rem; /* Plus d'espace */
+            gap: 20px;
             justify-content: center;
-            margin-bottom: 2rem;
-            min-height: 160px; /* Pour éviter le CLS quand les cartes se chargent */
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
         }
         #daily-shop-cards .card {
-            border: 3px solid transparent; /* Bordure par défaut */
+            width: 140px; /* Cartes un peu plus grandes dans la boutique */
+            height: 200px;
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
         }
-        #daily-shop-cards .card.selected-for-purchase {
-            border: 3px solid #3498db; /* Bordure pour carte sélectionnée à acheter */
-            box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
-            transform: scale(1.05);
+        .card.selected-for-purchase {
+            border: 4px solid #3498db; /* Bordure bleue pour la sélection */
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
         }
-        #daily-shop-cards .card .star-emoji {
-            /* Positionnement de l'étoile pour la boutique */
-            bottom: -20px; /* En dehors de la carte */
+
+        #duplicate-selection-area {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
-        #duplicate-selection-area h5 {
+        #duplicate-selection-area h3 {
             text-align: center;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            color: #34495e;
-            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        #duplicate-selection-area p {
+            text-align: center;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        #duplicate-selection-count {
+            font-weight: bold;
+            color: #e67e22; /* Orange pour le count */
         }
         #duplicate-selection-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 15px;
             justify-content: center;
-            max-height: 300px; /* Limite la hauteur et ajoute un scroll si nécessaire */
+            max-height: 400px; /* Limite la hauteur et rend la zone scrollable */
             overflow-y: auto;
-            padding-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #fafafa;
         }
-        #duplicate-selection-container .card {
-            border: 3px solid transparent; /* Bordure par défaut */
+        .card.selected-duplicate {
+            border: 4px solid #e67e22; /* Bordure orange pour les doublons sélectionnés */
+            box-shadow: 0 0 15px rgba(230, 126, 34, 0.8);
         }
-        #duplicate-selection-container .card.selected-duplicate {
-            border: 3px solid #f1c40f; /* Bordure pour doublon sélectionné */
-            box-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
-            transform: scale(1.05);
+
+        #buy-shop-card-btn {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            margin: 30px auto 0;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
-        /* Message box pour alert() */
+        #buy-shop-card-btn:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        #buy-shop-card-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Message Box */
         #message-box-overlay {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
             justify-content: center;
+            align-items: center;
             z-index: 2000;
             opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #message-box-overlay.show {
+            opacity: 1;
         }
         #message-box {
             background: white;
             padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             text-align: center;
-            max-width: 80%;
+            max-width: 400px;
+            width: 90%;
             transform: translateY(-20px);
-            transition: transform 0.3s ease;
+            opacity: 0;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
-        #message-box-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        #message-box-overlay.visible #message-box {
+        #message-box-overlay.show #message-box {
             transform: translateY(0);
+            opacity: 1;
         }
         #message-box p {
             font-size: 1.1rem;
@@ -493,8 +540,8 @@
             background: #3498db;
             color: white;
             border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
             cursor: pointer;
             font-size: 1rem;
             transition: background 0.3s ease;
@@ -503,91 +550,140 @@
             background: #2980b9;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                font-size: 1.2rem;
+            }
+            .tab-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            .section {
+                padding: 1rem;
+            }
+            #booster-preview-overlay .card {
+                width: 200px;
+                height: 280px;
+            }
+            .card {
+                width: 100px;
+                height: 140px;
+            }
+            #full-card-overlay .card.expanded {
+                width: 250px;
+                height: 350px;
+            }
+            #daily-shop-cards .card {
+                width: 120px;
+                height: 170px;
+            }
         }
 
-        @keyframes cardPop {
-            0% { transform: scale(0.5); opacity: 0; }
-            80% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); }
+        @media (max-width: 480px) {
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab-btn {
+                width: 45%;
+                margin: 5px 2%;
+            }
+            .booster-wrapper {
+                width: 120px;
+                height: 160px;
+            }
+            .booster-section p {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         SCG Pocket
-        <button id="logout-btn" onclick="logout()">❌</button>
+        <button id="logout-btn">Déconnexion</button>
     </header>
 
-    <div id="login" class="section visible">
-        <h2>Entrez votre code à 6 chiffres</h2>
-        <p>⚠️ Soyez bien sur votre navigateur personnel, les comptes sont hébergés en LOCAL. Ne supprimez pas l'historique non plus. ⚠️</p>
-        <input type="text" id="codeInput" maxlength="6" placeholder="Ex: 123456" />
-        <button onclick="login()">Connexion</button>
-    </div>
-
-    <div id="app" style="display: none;">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('booster')">Booster</button>
-            <button class="tab-btn" onclick="switchTab('collection')">Collection</button>
-            <button class="tab-btn" onclick="switchTab('shop')">Boutique</button>
-        </div>
-        <div style="text-align:center; margin: 1rem 0;">
-            <button onclick="exportData()" style="margin-right: 1rem;">📤 Exporter mes données</button>
-            <label for="importFile" style="cursor: pointer; color: #2980b9; text-decoration: underline;">
-            📥 Importer mes données
-            </label>
-            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importDataFromFile(this.files[0])">
-        </div>
-        <main>
-        <section id="booster" class="section visible">
-            <p>🃏 Boosters restants aujourd'hui : <span id="booster-count">3</span>/3</p>
-            <p>🔔 N'oubliez pas d'ajouter un rappel à 00h sur votre téléphone pour penser à ouvrir vos boosters !</p>
-        <div class="booster-buttons-container">
-            <div class="booster-wrapper booster-shiny" onclick="openBooster('OG')">
-                <img src="images/booster_OG.jpg" alt="Ouvrir un booster Extension OG" class="booster-image-actual">
-            </div>
-            <div class="booster-wrapper booster-shiny" onclick="openBooster('PR')">
-                <img src="images/booster_PR.jpg" alt="Ouvrir un booster Extension PR" class="booster-image-actual">
-            </div>
-            <div class="booster-wrapper booster-shiny" onclick="openBooster('TE')">
-                <img src="images/booster_TE.jpg" alt="Ouvrir un booster Extension TE" class="booster-image-actual">
-            </div>
-        </div>
-            <div id="booster-result" class="card-container"></div>
-
-            <div id="last-booster-summary" style="display:none;">
-                <h4>Résumé du dernier booster</h4>
-                <div class="card-container" id="last-booster-cards"></div>
+    <main>
+        <section id="login" class="section active">
+            <div id="login-form">
+                <h2>Connexion</h2>
+                <input type="password" id="user-code" placeholder="Code à 6 chiffres" maxlength="6" />
+                <button id="login-btn">Se connecter</button>
             </div>
         </section>
 
-            <section id="collection" class="section">
-                <h3>Votre Collection</h3>
-                <div id="collection-extensions"></div>
-            </section>
+        <div id="app-content" style="display: none;">
+            <div class="tabs">
+                <button class="tab-btn active" id="booster-tab">Booster</button>
+                <button class="tab-btn" id="collection-tab">Collection</button>
+                <button class="tab-btn" id="shop-tab">Boutique</button>
+                <button class="tab-btn" id="data-tab">Données</button>
+            </div>
 
-            <section id="shop" class="section">
-                <h3>Boutique</h3>
-                <p id="shop-message"></p>
-                <div id="daily-shop-cards" class="card-container">
+            <section id="booster-section" class="section active">
+                <h2>Ouvrir un Booster</h2>
+                <p>Boosters restants : <span id="booster-count">0</span>/3</p>
+                <div class="booster-buttons-container">
+                    <div class="booster-wrapper" id="open-og-booster">
+                        <img class="booster-image-actual" src="./assets/boosters/og.webp" alt="Booster OG" />
                     </div>
-                <button id="buy-shop-card-btn" disabled>Acheter la carte sélectionnée</button>
+                    <div class="booster-wrapper" id="open-pr-booster">
+                        <img class="booster-image-actual" src="./assets/boosters/pr.webp" alt="Booster PR" />
+                    </div>
+                    <div class="booster-wrapper" id="open-te-booster">
+                        <img class="booster-image-actual" src="./assets/boosters/te.webp" alt="Booster TE" />
+                    </div>
+                </div>
 
-                <div id="duplicate-selection-area">
-                    <h5>Sélectionnez 5 doublons différents pour l'échange :</h5>
-                    <div id="duplicate-selection-container" class="card-container">
+                <div id="booster-result-container">
+                    <h3>Dernier Booster Ouvert</h3>
+                    <div id="last-booster-summary" class="card-container">
                         </div>
                 </div>
             </section>
-        </main>
-    </div>
 
-    <div id="booster-preview-overlay" style="display:none;"></div>
-    <div id="full-card-overlay" class="overlay" style="display:none;"></div>
+            <section id="collection-section" class="section">
+                <h2>Ma Collection</h2>
+                <div id="collection-grid">
+                    </div>
+            </section>
+
+            <section id="shop-section" class="section">
+                <h2>Boutique du Jour</h2>
+                <p id="shop-message">Achetez une carte par jour en échangeant 5 doublons différents !</p>
+                <div id="daily-shop-cards" class="card-container">
+                    </div>
+
+                <div id="duplicate-selection-area">
+                    <h3>Sélectionnez 5 doublons à échanger (<span id="duplicate-selection-count">0</span>/5)</h3>
+                    <p>Cliquez sur les cartes que vous souhaitez échanger.</p>
+                    <div id="duplicate-selection-container" class="card-container">
+                        </div>
+                    <button id="buy-shop-card-btn" disabled>Acheter la carte sélectionnée</button>
+                </div>
+            </section>
+
+            <section id="data-section" class="section">
+                <h2>Gestion des Données</h2>
+                <button id="export-data-btn" class="booster-btn">Exporter mes données</button>
+                <p style="margin-top: 20px;">
+                    <label for="import-file">Importer des données :</label>
+                    <input type="file" id="import-file" accept=".json" />
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <div id="booster-preview-overlay" class="overlay">
+        </div>
+
+    <div id="full-card-overlay" class="overlay">
+        <div class="card expanded">
+            <img id="full-card-image" src="" alt="Carte agrandie" />
+            <div id="full-card-count-badge" class="count-badge"></div>
+        </div>
+    </div>
 
     <div id="message-box-overlay">
         <div id="message-box">
@@ -597,821 +693,876 @@
     </div>
 
     <script>
-        // Constantes du jeu
+        // Constantes
         const CARDS_PER_BOOSTER = 5;
         const DAILY_BOOSTER_LIMIT = 3;
-        const SHOP_DAILY_CARD_COUNT = 5; // Nombre de cartes proposées chaque jour à la boutique
-        const SHOP_NEW_CARD_CHANCE = 0.3; // 30% de chance d'avoir une carte non possédée
+        const SHOP_DAILY_CARD_COUNT = 5;
+        const SHOP_NEW_CARD_CHANCE = 0.3; // 30% de chance d'obtenir une nouvelle carte dans la boutique
         const SHOP_TRADE_COST = 5; // Nombre de doublons requis pour un échange
 
-        // Date du jour pour réinitialisations
+        // Date du jour pour les réinitialisations quotidiennes
         const today = new Date().toDateString();
-        let currentCode = ""; // Code utilisateur actuel
 
-        // Structure des extensions et des chemins d'images
-        const extensions = {
-            OG: Array.from({ length: 125 }, (_, i) => `images/OG/${String(i + 1).padStart(3, '0')}.jpg`),
-            PR: Array.from({ length: 65 }, (_, i) => `images/PR/${String(i + 1).padStart(3, '0')}.jpg`),
-            TE: Array.from({ length: 65 }, (_, i) => `images/TE/${String(i + 1).padStart(3, '0')}.jpg`),
-        };
+        // Stocke le code de l'utilisateur actuellement connecté
+        let currentCode = null;
 
-        // Liste des chemins d'images des cartes brillantes
-        const SHINY_CARDS_PATHS = [];
-
-        // images/OG/120.jpg à 125.jpg
-        for (let i = 121; i <= 125; i++) {
-            SHINY_CARDS_PATHS.push(`images/OG/${String(i).padStart(3, '0')}.jpg`);
-        }
-
-        // images/PR/035.jpg
-            SHINY_CARDS_PATHS.push("images/PR/035.jpg");
-
-        // images/PR/062.jpg à 065.jpg
-        for (let i = 62; i <= 65; i++) {
-            SHINY_CARDS_PATHS.push(`images/PR/${String(i).padStart(3, '0')}.jpg`);
-        }
-
-        // images/TE/064.jpg à 065.jpg
-        for (let i = 64; i <= 65; i++) {
-            SHINY_CARDS_PATHS.push(`images/TE/${String(i).padStart(3, '0')}.jpg`);
-        }
-
-        // Références aux éléments DOM
+        // Références DOM
+        const appContent = document.getElementById("app-content");
         const loginSection = document.getElementById("login");
-        const appSection = document.getElementById("app");
-        const codeInput = document.getElementById("codeInput");
+        const loginBtn = document.getElementById("login-btn");
+        const userCodeInput = document.getElementById("user-code");
+        const logoutBtn = document.getElementById("logout-btn");
+
         const boosterCountSpan = document.getElementById("booster-count");
-        const boosterResultContainer = document.getElementById("booster-result");
-        const lastBoosterSummary = document.getElementById("last-booster-summary");
-        const lastBoosterCardsContainer = document.getElementById("last-booster-cards");
-        const collectionExtensionsContainer = document.getElementById("collection-extensions");
+        const openOgBoosterBtn = document.getElementById("open-og-booster");
+        const openPrBoosterBtn = document.getElementById("open-pr-booster");
+        const openTeBoosterBtn = document.getElementById("open-te-booster");
         const boosterPreviewOverlay = document.getElementById("booster-preview-overlay");
+        const lastBoosterSummary = document.getElementById("last-booster-summary");
+
+        const boosterTab = document.getElementById("booster-tab");
+        const collectionTab = document.getElementById("collection-tab");
+        const shopTab = document.getElementById("shop-tab");
+        const dataTab = document.getElementById("data-tab");
+
+        const boosterSection = document.getElementById("booster-section");
+        const collectionSection = document.getElementById("collection-section");
+        const shopSection = document.getElementById("shop-section");
+        const dataSection = document.getElementById("data-section");
+
         const fullCardOverlay = document.getElementById("full-card-overlay");
+        const fullCardImage = document.getElementById("full-card-image");
+        const fullCardCountBadge = document.getElementById("full-card-count-badge");
+        const expandedCardElement = fullCardOverlay.querySelector('.card.expanded'); // La carte elle-même dans l'overlay
+
+        const shopMessage = document.getElementById("shop-message");
+        const dailyShopCardsContainer = document.getElementById("daily-shop-cards");
+        const duplicateSelectionContainer = document.getElementById("duplicate-selection-container");
+        const duplicateSelectionCountSpan = document.getElementById("duplicate-selection-count");
+        const buyShopCardBtn = document.getElementById("buy-shop-card-btn");
+
+        const exportDataBtn = document.getElementById("export-data-btn");
+        const importFileInput = document.getElementById("import-file");
+
         const messageBoxOverlay = document.getElementById("message-box-overlay");
         const messageBoxText = document.getElementById("message-box-text");
         const messageBoxOkBtn = document.getElementById("message-box-ok-btn");
-        const logoutBtn = document.getElementById("logout-btn"); // Ajouté car son onclick est dans le HTML
 
-        // Boutique éléments
-        const shopSection = document.getElementById("shop");
-        const shopMessage = document.getElementById("shop-message");
-        const dailyShopCardsContainer = document.getElementById("daily-shop-cards");
-        const buyShopCardBtn = document.getElementById("buy-shop-card-btn");
-        const duplicateSelectionArea = document.getElementById("duplicate-selection-area");
-        const duplicateSelectionContainer = document.getElementById("duplicate-selection-container");
+        // Variables d'état pour le slide
+        let currentExpandedCardIndex = -1;
+        let currentExpandedCardsList = []; // Contiendra toutes les cartes de la collection actuelle pour le slide
+
+        // Variables pour la détection de glissement
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let touchStartY = 0;
+        let touchEndY = 0;
+        const swipeThreshold = 50; // Nombre de pixels minimum pour considérer un glissement
+        const swipeMaxY = 50; // Mouvement vertical maximal pour considérer un swipe horizontal
+
+        let mouseStartX = 0;
+        let mouseEndX = 0;
+        let isMouseDown = false;
 
 
-        // Variables d'état du jeu (pour l'ouverture de booster)
-        let boosterCardsToShow = [];
-        let boosterCardIndex = 0;
+        // Génération des chemins d'images pour les extensions
+        const extensions = {
+            OG: Array.from({ length: 15 }, (_, i) => `./assets/cards/OG/${i + 1}.webp`),
+            PR: Array.from({ length: 15 }, (_, i) => `./assets/cards/PR/${i + 1}.webp`),
+            TE: Array.from({ length: 15 }, (_, i) => `./assets/cards/TE/${i + 1}.webp`)
+        };
 
-        /**
-         * @typedef {Object} CardData
-         * @property {string} image - Chemin de l'image de la carte.
-         * @property {string} extension - Extension de la carte (ex: 'OG', 'PR', 'TE').
-         * @property {number} count - Nombre d'exemplaires de cette carte possédés.
-         * @property {boolean} [isNew] - Indique si la carte est nouvelle (utilisé pour les boosters/boutique).
-         * @property {boolean} [isSelectedForPurchase] - Indique si la carte de la boutique est sélectionnée pour achat.
-         * @property {boolean} [isSelectedAsDuplicate] - Indique si la carte est sélectionnée comme doublon pour un échange.
-         */
+        // Liste des cartes "shiny" (à ajuster avec vos chemins exacts si besoin)
+        const SHINY_CARDS_PATHS = [
+            './assets/cards/OG/5.webp',
+            './assets/cards/OG/10.webp',
+            './assets/cards/OG/15.webp',
+            './assets/cards/PR/5.webp',
+            './assets/cards/PR/10.webp',
+            './assets/cards/PR/15.webp',
+            './assets/cards/TE/5.webp',
+            './assets/cards/TE/10.webp',
+            './assets/cards/TE/15.webp'
+        ];
 
-        /**
-         * Affiche un message à l'utilisateur dans une boîte de dialogue personnalisée.
-         * Remplace les alert().
-         * @param {string} message - Le message à afficher.
-         */
+        // --- Fonctions utilitaires ---
         function showMessage(message) {
             messageBoxText.textContent = message;
-            messageBoxOverlay.classList.add("visible");
+            messageBoxOverlay.classList.add('show');
         }
 
-        /**
-         * Retourne la clé de stockage unique pour l'utilisateur actuel.
-         * @returns {string} La clé localStorage.
-         */
         function getStorageKey() {
             return `cardData_user_${currentCode}`;
         }
 
-        /**
-         * Récupère les données du jeu depuis localStorage pour l'utilisateur actuel.
-         * Initialise les données si elles n'existent pas ou sont obsolètes (jour précédent).
-         * @returns {Object} Les données du jeu.
-         */
         function getData() {
-            let data = JSON.parse(localStorage.getItem(getStorageKey())) || {};
+            if (!currentCode) return {};
 
-            // Réinitialisation quotidienne des boosters et de la boutique
+            const key = getStorageKey();
+            const storedData = localStorage.getItem(key);
+            let data = storedData ? JSON.parse(storedData) : {};
+
+            // Initialisation des données si elles n'existent pas
+            if (!data.collection) data.collection = {};
+            if (!data.boosterDailyCount) data.boosterDailyCount = DAILY_BOOSTER_LIMIT;
+            if (!data.lastBooster) data.lastBooster = [];
+            if (!data.shopCards) data.shopCards = [];
+            if (!data.shopBoughtToday) data.shopBoughtToday = false;
+            if (!data.date) data.date = today;
+
+            // Réinitialisation quotidienne
             if (data.date !== today) {
+                data.boosterDailyCount = DAILY_BOOSTER_LIMIT;
+                data.shopBoughtToday = false;
+                data.shopCards = generateShopCardsInternal(data.collection); // Génère de nouvelles cartes pour la boutique
                 data.date = today;
-                data.remaining = DAILY_BOOSTER_LIMIT;
-                data.shopBoughtToday = false; // Réinitialise l'achat de la boutique
-                data.shopDate = today; // Met à jour la date de la boutique
-                data.shopCards = generateShopCardsInternal(data.collection || []); // Génère de nouvelles cartes pour la boutique
             }
-
-            data.collection = data.collection || [];
-            data.lastBooster = data.lastBooster || null;
-            // Assure que les cartes boutique sont toujours là (pour les cas où data.date était déjà 'today' mais shopCards manquait)
-            if (!data.shopCards || data.shopDate !== today) {
-                 data.shopCards = generateShopCardsInternal(data.collection);
-                 data.shopDate = today;
-            }
-            data.shopBoughtToday = data.shopBoughtToday || false;
-            data.selectedShopCard = data.selectedShopCard === undefined ? null : data.selectedShopCard;
-            data.selectedDuplicatesForShop = data.selectedDuplicatesForShop || [];
-
-
-            saveData(data); // Sauvegarde les données initialisées ou mises à jour
+            saveData(data); // Sauvegarde après toute initialisation/réinitialisation
             return data;
         }
 
-        /**
-         * Sauvegarde les données du jeu dans localStorage pour l'utilisateur actuel.
-         * @param {Object} data - Les données du jeu à sauvegarder.
-         */
         function saveData(data) {
+            if (!currentCode) return;
             localStorage.setItem(getStorageKey(), JSON.stringify(data));
         }
 
-        /**
-         * Met à jour le compteur de boosters restants affiché.
-         */
+        // --- Fonctions Booster ---
         function updateBoosterCount() {
             const data = getData();
-            document.getElementById("booster-count").textContent = data.remaining;
+            boosterCountSpan.textContent = data.boosterDailyCount;
+            const canOpenBooster = data.boosterDailyCount > 0;
+            openOgBoosterBtn.style.opacity = canOpenBooster ? '1' : '0.5';
+            openPrBoosterBtn.style.opacity = canOpenBooster ? '1' : '0.5';
+            openTeBoosterBtn.style.opacity = canOpenBooster ? '1' : '0.5';
+
+            openOgBoosterBtn.style.cursor = canOpenBooster ? 'pointer' : 'not-allowed';
+            openPrBoosterBtn.style.cursor = canOpenBooster ? 'pointer' : 'not-allowed';
+            openTeBoosterBtn.style.cursor = canOpenBooster ? 'pointer' : 'not-allowed';
         }
 
-        /**
-         * Ouvre un booster d'une extension donnée.
-         * Reprise de la logique de index (4).html
-         * @param {string} extension - L'extension du booster ('OG' ou 'PR').
-         */
-        function openBooster(extension) {
+        function openBooster(extensionName) {
             const data = getData();
-            if (data.remaining <= 0) {
-                showMessage("Vous avez atteint la limite de boosters pour aujourd'hui !");
+            if (data.boosterDailyCount <= 0) {
+                showMessage("Vous avez ouvert tous vos boosters quotidiens ! Revenez demain.");
                 return;
             }
 
-            const pool = extensions[extension];
-            boosterCardsToShow = [];
-            boosterCardIndex = 0;
-
-            // Tirage aléatoire de cartes
-            for (let i = 0; i < CARDS_PER_BOOSTER; i++) {
-                const image = pool[Math.floor(Math.random() * pool.length)];
-                boosterCardsToShow.push({ image, extension, isNew: false });
+            const availableCards = extensions[extensionName];
+            if (!availableCards || availableCards.length === 0) {
+                showMessage("Erreur: Aucune carte trouvée pour cette extension.");
+                return;
             }
 
-            // Détection des nouvelles cartes
-            boosterCardsToShow.forEach(card => {
-                const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
-                card.isNew = !existing;
-            });
+            const newCards = [];
+            for (let i = 0; i < CARDS_PER_BOOSTER; i++) {
+                const randomIndex = Math.floor(Math.random() * availableCards.length);
+                const cardPath = availableCards[randomIndex];
+                const isNew = !data.collection[cardPath];
 
-            // Mise à jour collection (incrémente count si déjà présent)
-            boosterCardsToShow.forEach(card => {
-                const existing = data.collection.find(c => c.image === card.image && c.extension === card.extension);
-                if (existing) {
-                    existing.count = (existing.count || 1) + 1;
+                // Mettre à jour la collection
+                if (data.collection[cardPath]) {
+                    data.collection[cardPath].count++;
                 } else {
-                    data.collection.push({ image: card.image, extension: card.extension, count: 1 });
+                    data.collection[cardPath] = {
+                        count: 1,
+                        new: true // Marquer comme nouvelle pour l'affichage post-booster
+                    };
                 }
-            });
+                newCards.push({ image: cardPath, isNew: isNew });
+            }
 
-            data.remaining--;
-            data.lastBooster = boosterCardsToShow.map(c => ({...c})); // clone
+            data.boosterDailyCount--;
+            data.lastBooster = newCards;
             saveData(data);
             updateBoosterCount();
-
             showBoosterPreview();
-
-            // Cacher résumé dernier booster
-            document.getElementById("last-booster-summary").style.display = "none";
-            updateCollection();
         }
 
-        /**
-         * Affiche l'animation d'ouverture de booster carte par carte.
-         * Reprise de la logique de index (4).html
-         */
         function showBoosterPreview() {
-            const overlay = document.getElementById("booster-preview-overlay");
-            overlay.innerHTML = "";
-            overlay.style.display = "flex";
+            boosterPreviewOverlay.innerHTML = ''; // Nettoyer l'ancienne prévisualisation
+            boosterPreviewOverlay.style.display = 'flex';
+            lastBoosterSummary.innerHTML = ''; // Nettoyer le résumé précédent
 
-            let idx = 0;
+            const data = getData();
+            const cards = data.lastBooster;
+            let cardIndex = 0;
 
-            function showCard(i) {
-                overlay.innerHTML = "";
-                const card = boosterCardsToShow[i];
-                if (!card) return;
-
-                const el = document.createElement("div");
-                el.className = "card";
-                el.style.backgroundImage = `url(${card.image})`;
-                if (SHINY_CARDS_PATHS.includes(card.image)) {
-                    el.classList.add("shiny-card");
-                }
-                if (card.isNew) {
-                    const star = document.createElement("div");
-                    star.textContent = "⭐";
-                    star.className = "star-emoji";
-                    el.appendChild(star);
-                }
-                overlay.appendChild(el);
-
-                el.onclick = () => {
-                    idx++;
-                    if (idx < boosterCardsToShow.length) {
-                        showCard(idx);
-                    } else {
-                        overlay.style.display = "none";
-                        // Afficher les cartes dans le conteneur principal du booster une fois l'animation terminée
-                        displayBoosterResultCards(boosterCardsToShow);
-                        showLastBoosterSummary();
+            function displayNextCard() {
+                if (cardIndex < cards.length) {
+                    const cardData = cards[cardIndex];
+                    const cardElement = document.createElement('div');
+                    cardElement.className = `card ${SHINY_CARDS_PATHS.includes(cardData.image) ? 'shiny-card' : ''}`;
+                    cardElement.style.backgroundImage = `url('${cardData.image}')`;
+                    
+                    if (cardData.isNew) {
+                        const star = document.createElement('span');
+                        star.className = 'star-emoji';
+                        star.textContent = '⭐';
+                        cardElement.appendChild(star);
                     }
-                };
+
+                    boosterPreviewOverlay.appendChild(cardElement);
+
+                    // Forcer le reflow pour que la transition CSS fonctionne
+                    void cardElement.offsetWidth;
+                    cardElement.classList.add('show');
+                    cardElement.addEventListener('click', displayNextCard);
+                    cardIndex++;
+                } else {
+                    // Toutes les cartes sont affichées, fermer l'overlay
+                    setTimeout(() => {
+                        boosterPreviewOverlay.style.display = 'none';
+                        displayBoosterResultCards(cards);
+                        updateCollection(); // Mettre à jour la collection après l'ouverture du booster
+                        showLastBoosterSummary();
+                    }, 500); // Attendre un peu avant de fermer
+                }
             }
-
-            showCard(0);
+            displayNextCard();
         }
 
-        /**
-         * NOUVELLE FONCTION: Affiche les cartes du booster dans le conteneur principal de résultat.
-         * @param {Array<CardData>} cards - Les cartes à afficher.
-         */
         function displayBoosterResultCards(cards) {
-            boosterResultContainer.innerHTML = ""; // Vider le container avant d'ajouter les cartes
-            cards.forEach(card => {
-                const el = document.createElement("div");
-                el.className = "card";
-                el.style.backgroundImage = `url(${card.image})`;
-                if (SHINY_CARDS_PATHS.includes(card.image)) {
-                    el.classList.add("shiny-card");
-                }
-                if (card.isNew) {
-                    const star = document.createElement("div");
-                    star.textContent = "⭐";
-                    star.className = "star-emoji";
-                    el.appendChild(star);
-                }
-                boosterResultContainer.appendChild(el);
-            });
-            boosterResultContainer.style.display = "flex"; // S'assurer que le container est visible
-        }
+            lastBoosterSummary.innerHTML = ''; // Assurez-vous que c'est vide
+            cards.forEach(cardData => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${SHINY_CARDS_PATHS.includes(cardData.image) ? 'shiny-card' : ''}`;
+                cardElement.style.backgroundImage = `url('${cardData.image}')`;
 
-        /**
-         * Affiche le résumé des cartes obtenues lors du dernier booster ouvert.
-         * Reprise de la logique de index (4).html
-         */
+                const data = getData();
+                const count = data.collection[cardData.image] ? data.collection[cardData.image].count : 0;
+                if (count > 1) {
+                    const countBadge = document.createElement("div");
+                    countBadge.className = "count-badge";
+                    countBadge.textContent = count;
+                    cardElement.appendChild(countBadge);
+                }
+                
+                if (cardData.isNew) {
+                    const star = document.createElement('span');
+                    star.className = 'star-emoji';
+                    star.textContent = '⭐';
+                    cardElement.appendChild(star);
+                }
+                cardElement.addEventListener("click", () => {
+                    // Trouver l'index de cette carte dans la liste globale currentExpandedCardsList
+                    const globalIndex = currentExpandedCardsList.findIndex(c => c.image === cardData.image);
+                    showFullCardOverlay(globalIndex);
+                });
+                lastBoosterSummary.appendChild(cardElement);
+            });
+        }
+        
         function showLastBoosterSummary() {
             const data = getData();
-            const summary = document.getElementById("last-booster-summary");
-            const container = document.getElementById("last-booster-cards");
-            container.innerHTML = "";
-
-            if (!data.lastBooster || data.lastBooster.length === 0) {
-                summary.style.display = "none";
+            const cards = data.lastBooster || [];
+            if (cards.length === 0) {
+                lastBoosterSummary.innerHTML = '<p style="text-align: center; color: #777;">Ouvrez un booster pour voir vos dernières cartes !</p>';
                 return;
             }
-
-            data.lastBooster.forEach(card => {
-                const el = document.createElement("div");
-                el.className = "card";
-                el.style.backgroundImage = `url(${card.image})`;
-                if (SHINY_CARDS_PATHS.includes(card.image)) {
-                   cardEl.classList.add("shiny-card");
-                }
-                if (card.isNew) {
-                    const star = document.createElement("div");
-                    star.textContent = "⭐";
-                    star.className = "star-emoji";
-                    el.appendChild(star);
-                }
-                container.appendChild(el);
-            });
-
-            summary.style.display = "block";
+            displayBoosterResultCards(cards);
         }
 
-        /**
-         * Met à jour l'affichage de la collection de cartes par extension.
-         * Reprise de la logique de index (4).html
-         */
+        // --- Fonctions Collection ---
         function updateCollection() {
             const data = getData();
-            const container = document.getElementById("collection-extensions");
-            container.innerHTML = "";
+            const collection = data.collection || {};
+            const collectionGrid = document.getElementById("collection-grid");
+            collectionGrid.innerHTML = ""; // Nettoyer l'ancienne collection
 
-            // Organiser par extension
-            const collectionsByExtension = {};
-            data.collection.forEach(card => {
-                if (!collectionsByExtension[card.extension]) {
-                    collectionsByExtension[card.extension] = [];
-                }
-                collectionsByExtension[card.extension].push(card);
+            const sortedCardPaths = Object.keys(collection).sort((a, b) => {
+                // Trie d'abord par extension
+                const getExtensionCode = (path) => path.split('/')[2]; // Assuming path is like ./assets/cards/OG/1.webp
+                const extA = getExtensionCode(a);
+                const extB = getExtensionCode(b);
+
+                if (extA < extB) return -1;
+                if (extA > extB) return 1;
+
+                // Ensuite par numéro de carte si même extension
+                const getCardNumber = (path) => parseInt(path.match(/(\d+)\.webp$/)[1]);
+                return getCardNumber(a) - getCardNumber(b);
             });
 
-            for (const ext in collectionsByExtension) {
-                // Trier les cartes par numéro de fichier
-                const cards = collectionsByExtension[ext].sort((a, b) => {
-                    const getNumber = img => parseInt(img.image.match(/(\d+)\.jpg$/)[1], 10);
-                    return getNumber(a) - getNumber(b);
+            // PRÉPAREZ LA LISTE currentExpandedCardsList ICI pour le slide
+            currentExpandedCardsList = sortedCardPaths.map(imagePath => ({
+                image: imagePath,
+                count: collection[imagePath].count || 1
+            }));
+
+            const cardsByExtension = {};
+            sortedCardPaths.forEach(imagePath => {
+                const parts = imagePath.split('/');
+                const extension = parts[2]; // ex: 'OG', 'PR', 'TE'
+                if (!cardsByExtension[extension]) {
+                    cardsByExtension[extension] = [];
+                }
+                cardsByExtension[extension].push({
+                    image: imagePath,
+                    count: collection[imagePath].count || 1
                 });
+            });
 
-                const totalAvailable = ext === "OG" ? extensions.OG.length : ext === "PR" ? extensions.PR.length : ext === "TE" ? extensions.TE.length : 0;
-                const ownedUnique = new Set(cards.map(c => c.image)).size;
+            Object.keys(cardsByExtension).sort().forEach(extension => {
+                const extensionSection = document.createElement("div");
+                extensionSection.className = "extension-section";
+                
+                const totalCardsInExtension = extensions[extension] ? extensions[extension].length : '??';
+                const uniqueCardsInExtension = cardsByExtension[extension].length;
 
-                const extSection = document.createElement("div");
-                extSection.innerHTML = `<h4>Extension ${ext} (${ownedUnique}/${totalAvailable})</h4>`;
+                extensionSection.innerHTML = `<h3>${extension} (${uniqueCardsInExtension}/${totalCardsInExtension})</h3>`;
+                const extensionGrid = document.createElement("div");
+                extensionGrid.className = "card-container";
 
-                const cardsDiv = document.createElement("div");
-                cardsDiv.className = "card-container";
-
-                cards.forEach(card => {
-                    const cardDiv = document.createElement("div");
-                    cardDiv.className = "card";
-                    cardDiv.style.backgroundImage = `url(${card.image})`;
-                    if (SHINY_CARDS_PATHS.includes(card.image)) {
-                        cardDiv.classList.add("shiny-card");
+                cardsByExtension[extension].forEach(card => {
+                    const cardElement = document.createElement("div");
+                    cardElement.className = `card ${SHINY_CARDS_PATHS.includes(card.image) ? 'shiny-card' : ''}`;
+                    cardElement.style.backgroundImage = `url('${card.image}')`;
+                    
+                    const countBadge = document.createElement("div");
+                    countBadge.className = "count-badge";
+                    countBadge.textContent = card.count;
+                    if (card.count <= 1) { // Cache le badge si un seul exemplaire
+                        countBadge.style.display = 'none';
                     }
+                    cardElement.appendChild(countBadge);
 
-                    if (card.count > 1) {
-                        const countBadge = document.createElement("div");
-                        countBadge.className = "count-badge";
-                        countBadge.textContent = `x${card.count}`;
-                        cardDiv.appendChild(countBadge);
-                    }
-
-                    // Agrandir carte au clic
-                    cardDiv.addEventListener("click", () => {
-                        showFullCardOverlay(card.image, card.count);
+                    cardElement.addEventListener("click", () => {
+                        // Trouver l'index de cette carte dans la liste globale currentExpandedCardsList
+                        const globalIndex = currentExpandedCardsList.findIndex(c => c.image === card.image);
+                        showFullCardOverlay(globalIndex); // Passez l'index
                     });
-
-                    cardsDiv.appendChild(cardDiv);
+                    extensionGrid.appendChild(cardElement);
                 });
+                extensionSection.appendChild(extensionGrid);
+                collectionGrid.appendChild(extensionSection);
+            });
+        }
 
-                extSection.appendChild(cardsDiv);
-                container.appendChild(extSection);
+        function showFullCardOverlay(index) {
+            if (index < 0 || index >= currentExpandedCardsList.length) {
+                console.error("Index de carte invalide pour l'overlay:", index);
+                return;
+            }
+
+            currentExpandedCardIndex = index;
+            const cardToShow = currentExpandedCardsList[currentExpandedCardIndex];
+
+            fullCardImage.src = cardToShow.image;
+            fullCardCountBadge.textContent = cardToShow.count;
+            fullCardCountBadge.style.display = cardToShow.count > 1 ? 'block' : 'none'; // Affiche ou masque le badge
+
+            fullCardOverlay.style.display = "flex"; // Affiche l'overlay
+
+            // Réinitialiser les classes d'animation pour la première affichage
+            expandedCardElement.classList.remove('slide-enter-from-right', 'slide-enter-from-left', 'slide-leave-to-left', 'slide-leave-to-right');
+        }
+
+        function navigateFullCard(direction) { // direction: -1 pour précédent, 1 pour suivant
+            if (currentExpandedCardIndex === -1 || currentExpandedCardsList.length === 0) {
+                return; // Pas de carte ouverte
+            }
+
+            const nextIndex = currentExpandedCardIndex + direction;
+
+            if (nextIndex >= 0 && nextIndex < currentExpandedCardsList.length) {
+                // Appliquer l'animation de sortie
+                if (direction === 1) { // Vers la droite (carte suivante)
+                    expandedCardElement.classList.add('slide-leave-to-left');
+                    expandedCardElement.classList.remove('slide-enter-from-right', 'slide-enter-from-left', 'slide-leave-to-right');
+                } else { // Vers la gauche (carte précédente)
+                    expandedCardElement.classList.add('slide-leave-to-right');
+                    expandedCardElement.classList.remove('slide-enter-from-right', 'slide-enter-from-left', 'slide-leave-to-left');
+                }
+
+                // Attendre la fin de l'animation de sortie pour changer la source
+                expandedCardElement.addEventListener('transitionend', function handler() {
+                    expandedCardElement.removeEventListener('transitionend', handler);
+
+                    currentExpandedCardIndex = nextIndex;
+                    const cardToShow = currentExpandedCardsList[currentExpandedCardIndex];
+
+                    fullCardImage.src = cardToShow.image;
+                    fullCardCountBadge.textContent = cardToShow.count;
+                    fullCardCountBadge.style.display = cardToShow.count > 1 ? 'block' : 'none';
+
+                    // Appliquer l'animation d'entrée
+                    if (direction === 1) { // Vient de la droite
+                        expandedCardElement.classList.remove('slide-leave-to-left');
+                        expandedCardElement.classList.add('slide-enter-from-right');
+                    } else { // Vient de la gauche
+                        expandedCardElement.classList.remove('slide-leave-to-right');
+                        expandedCardElement.classList.add('slide-enter-from-left');
+                    }
+
+                    // Pour nettoyer les classes d'animation après l'entrée (sinon elles restent)
+                    setTimeout(() => {
+                        expandedCardElement.classList.remove('slide-enter-from-right', 'slide-enter-from-left');
+                    }, 300); // Doit correspondre à la durée de la transition CSS
+                    
+                }, { once: true }); // S'assure que l'écouteur n'est appelé qu'une seule fois
             }
         }
 
-        /**
-         * Affiche un overlay pour agrandir une carte (utilisé pour la collection et la boutique).
-         * Reprise de la logique de index (4).html
-         * @param {string} image - Chemin de l'image de la carte.
-         * @param {number} count - Nombre d'exemplaires de cette carte.
-         */
-        function showFullCardOverlay(image, count) {
-            fullCardOverlay.innerHTML = ""; // Nettoie l'overlay précédent
-            fullCardOverlay.style.display = "flex";
 
-            const card = document.createElement("div");
-            card.className = "card expanded";
-            card.style.backgroundImage = `url(${image})`;
-            if (SHINY_CARDS_PATHS.includes(image)) {
-                card.classList.add("shiny-card");
-            } else {
-                // IMPORTANT: Si la carte n'est PAS brillante, assurez-vous de retirer la classe.
-                // C'est crucial car l'overlay est réutilisé.
-                card.classList.remove("shiny-card");
-            }
-            if (count !== undefined && count > 1) { // Affiche le count badge si présent et > 1
-                const countBadge = document.createElement("div");
-                countBadge.className = "count-badge";
-                countBadge.textContent = `x${count}`;
-                card.appendChild(countBadge);
-            }
-
-            fullCardOverlay.appendChild(card);
-
-            // Ferme l'overlay au clic n'importe où dessus
-            fullCardOverlay.onclick = () => {
-                fullCardOverlay.style.display = "none";
-            };
-        }
-
-        /**
-         * Génère les 5 cartes quotidiennes pour la boutique.
-         * 30% de chance d'être une carte non possédée.
-         * @param {Array<CardData>} userCollection - La collection actuelle de l'utilisateur.
-         * @returns {Array<CardData>} Les 5 cartes de la boutique pour le jour.
-         */
+        // --- Fonctions Boutique ---
         function generateShopCardsInternal(userCollection) {
             const allPossibleCards = [];
-            // Cette boucle itère sur 'OG' et 'PR'
             for (const ext in extensions) {
-                extensions[ext].forEach(image => {
-                    // Ajoute les cartes des deux extensions à la liste de toutes les cartes possibles
-                    allPossibleCards.push({ image, extension: ext });
-                });
+                allPossibleCards.push(...extensions[ext]);
             }
 
-            const unownedCards = allPossibleCards.filter(card =>
-                !userCollection.some(c => c.image === card.image && c.extension === card.extension)
-            );
-            const ownedCards = allPossibleCards.filter(card =>
-                userCollection.some(c => c.image === card.image && c.extension === card.extension)
-            );
-
-            const dailyCards = [];
+            const shopCards = [];
+            const cardsNotOwned = allPossibleCards.filter(cardPath => !userCollection[cardPath]);
+            
             for (let i = 0; i < SHOP_DAILY_CARD_COUNT; i++) {
-                let chosenCard;
-                const isNewChance = Math.random();
-
-                // 30% de chance d'obtenir une nouvelle carte si des nouvelles sont disponibles
-                if (isNewChance < SHOP_NEW_CARD_CHANCE && unownedCards.length > 0) {
-                    chosenCard = unownedCards[Math.floor(Math.random() * unownedCards.length)];
-                    // Pour éviter de proposer la même carte non possédée plusieurs fois dans la même sélection journalière
-                    unownedCards.splice(unownedCards.indexOf(chosenCard), 1);
+                let cardPath;
+                if (Math.random() < SHOP_NEW_CARD_CHANCE && cardsNotOwned.length > 0) {
+                    // Tente de proposer une nouvelle carte
+                    const randomIndex = Math.floor(Math.random() * cardsNotOwned.length);
+                    cardPath = cardsNotOwned.splice(randomIndex, 1)[0]; // Retire la carte pour éviter les doublons dans la boutique
                 } else {
-                    // Sinon, tire au hasard parmi toutes les cartes possibles
-                    chosenCard = allPossibleCards[Math.floor(Math.random() * allPossibleCards.length)];
+                    // Propose une carte aléatoire parmi toutes les cartes possibles
+                    const randomIndex = Math.floor(Math.random() * allPossibleCards.length);
+                    cardPath = allPossibleCards[randomIndex];
                 }
-
-                // Vérifie si la carte choisie est déjà possédée par l'utilisateur
-                const isOwned = userCollection.some(c => c.image === chosenCard.image && c.extension === chosenCard.extension);
-                dailyCards.push({ ...chosenCard, isNew: !isOwned, isSelectedForPurchase: false });
+                shopCards.push(cardPath);
             }
-            return dailyCards;
+            return shopCards;
         }
 
-        /**
-         * Met à jour l'affichage de la boutique.
-         */
-        function updateShop() {
-            const data = getData(); // S'assure que les données sont à jour (y compris shopDate et shopCards)
+        let selectedShopCardIndex = -1;
+        let selectedDuplicates = []; // Stocke les chemins des cartes doublons sélectionnées
 
-            dailyShopCardsContainer.innerHTML = "";
-            duplicateSelectionContainer.innerHTML = "";
-            duplicateSelectionArea.style.display = "block"; // Affiche toujours l'aire de sélection par défaut
+        function updateShop() {
+            const data = getData();
+            dailyShopCardsContainer.innerHTML = '';
+            selectedShopCardIndex = -1; // Réinitialiser la sélection
+            selectedDuplicates = [];
+            updateBuyButtonState();
 
             if (data.shopBoughtToday) {
-                shopMessage.textContent = "💰 Revenez demain pour un nouvel achat !";
-                dailyShopCardsContainer.style.display = "none";
-                buyShopCardBtn.style.display = "none";
-                duplicateSelectionArea.style.display = "none"; // Cache l'aire de sélection si déjà acheté
-                return;
+                shopMessage.textContent = "Vous avez déjà effectué votre achat quotidien. Revenez demain !";
+                dailyShopCardsContainer.innerHTML = '<p style="text-align: center; color: #777; width: 100%;">La boutique est fermée pour aujourd\'hui.</p>';
+                buyShopCardBtn.disabled = true;
             } else {
-                shopMessage.textContent = ""; // Réinitialise le message
-                dailyShopCardsContainer.style.display = "flex";
-                buyShopCardBtn.style.display = "block";
-            }
-
-            // Affiche les 5 cartes du jour dans la boutique
-            data.shopCards.forEach((card, index) => {
-                const cardDiv = document.createElement("div");
-                // La classe 'selected-for-purchase' est appliquée si la carte correspond à la carte sélectionnée
-                // et si son index correspond à data.selectedShopCard
-                const isSelected = data.selectedShopCard !== null && data.selectedShopCard === index;
-                cardDiv.className = `card ${isSelected ? 'selected-for-purchase' : ''}`;
-                cardDiv.style.backgroundImage = `url(${card.image})`;
-                if (SHINY_CARDS_PATHS.includes(card.image)) {
-                    cardEl.classList.add("shiny-card");
-                }
-                if (card.isNew) {
-                    const star = document.createElement("div");
-                    star.textContent = "⭐";
-                    star.className = "star-emoji";
-                    cardDiv.appendChild(star);
-                }
-
-                // Gère la sélection d'une carte à acheter dans la boutique
-                cardDiv.addEventListener("click", () => {
-                    selectShopCard(index);
+                shopMessage.textContent = `Achetez une carte par jour en échangeant ${SHOP_TRADE_COST} doublons différents !`;
+                data.shopCards.forEach((cardPath, index) => {
+                    const cardElement = document.createElement("div");
+                    cardElement.className = `card ${SHINY_CARDS_PATHS.includes(cardPath) ? 'shiny-card' : ''}`;
+                    cardElement.style.backgroundImage = `url('${cardPath}')`;
+                    
+                    cardElement.addEventListener("click", () => selectShopCard(index));
+                    dailyShopCardsContainer.appendChild(cardElement);
                 });
-                dailyShopCardsContainer.appendChild(cardDiv);
-            });
-
-            // Active/Désactive le bouton d'achat
-            updateBuyButtonState();
-            // Affiche les doublons disponibles pour l'échange
+            }
             renderDuplicatesForSelection();
         }
 
-        /**
-         * Sélectionne une carte dans la boutique pour l'achat.
-         * @param {number} index - L'index de la carte sélectionnée dans le tableau shopCards.
-         */
         function selectShopCard(index) {
             const data = getData();
-            // Si la carte est déjà sélectionnée, la désélectionne
-            if (data.selectedShopCard === index) {
-                data.selectedShopCard = null;
-            } else {
-                // Sinon, sélectionne cette carte
-                data.selectedShopCard = index;
+            if (data.shopBoughtToday) return;
+
+            // Désélectionner la carte précédente si elle existe
+            if (selectedShopCardIndex !== -1) {
+                dailyShopCardsContainer.children[selectedShopCardIndex].classList.remove("selected-for-purchase");
             }
-            saveData(data);
-            updateShop(); // Rafraîchit l'affichage pour montrer la sélection
+
+            if (selectedShopCardIndex === index) {
+                // Si la même carte est cliquée à nouveau, la désélectionner
+                selectedShopCardIndex = -1;
+            } else {
+                // Sélectionner la nouvelle carte
+                selectedShopCardIndex = index;
+                dailyShopCardsContainer.children[selectedShopCardIndex].classList.add("selected-for-purchase");
+            }
+            updateBuyButtonState();
         }
 
-        /**
-         * Rend les cartes doublons de l'utilisateur pour la sélection.
-         */
         function renderDuplicatesForSelection() {
             const data = getData();
-            duplicateSelectionContainer.innerHTML = "";
+            duplicateSelectionContainer.innerHTML = '';
+            const duplicates = Object.keys(data.collection).filter(cardPath => data.collection[cardPath].count > 1);
+            
+            duplicateSelectionCountSpan.textContent = selectedDuplicates.length;
 
-            // Filtre les cartes qui ont plus d'un exemplaire (ce sont les doublons échangeables)
-            const availableDuplicates = data.collection.filter(card => card.count > 1);
-
-            if (availableDuplicates.length === 0) {
-                duplicateSelectionArea.innerHTML = "<h5>Vous n'avez pas de doublons à échanger.</h5>";
-                buyShopCardBtn.disabled = true;
+            if (duplicates.length === 0) {
+                duplicateSelectionContainer.innerHTML = '<p style="width: 100%; text-align: center; color: #777;">Vous n\'avez pas encore de doublons à échanger.</p>';
                 return;
             }
 
-            // Trie les doublons pour un affichage cohérent
-            availableDuplicates.sort((a, b) => {
-                const getNumber = img => parseInt(img.image.match(/(\d+)\.jpg$/)[1], 10);
-                if (a.extension === b.extension) {
-                    return getNumber(a) - getNumber(b);
+            duplicates.forEach(cardPath => {
+                // Créer une carte pour chaque doublon, et créer un nombre de badges égal au nombre de doublons
+                for (let i = 0; i < data.collection[cardPath].count - 1; i++) { // -1 car on garde toujours 1 exemplaire
+                    const cardElement = document.createElement("div");
+                    cardElement.className = `card ${SHINY_CARDS_PATHS.includes(cardPath) ? 'shiny-card' : ''}`;
+                    cardElement.style.backgroundImage = `url('${cardPath}')`;
+                    
+                    // Marquer comme sélectionné si déjà dans la liste
+                    if (selectedDuplicates.includes(cardPath)) {
+                        cardElement.classList.add("selected-duplicate");
+                    }
+
+                    // On ne peut pas avoir un badge de compte sur chaque doublon individuel ici, ça n'aurait pas de sens.
+                    // Le badge de compte est sur la carte unique dans la collection.
+
+                    cardElement.dataset.cardPath = cardPath; // Stocke le chemin pour le retrouver
+                    cardElement.addEventListener("click", () => toggleDuplicateSelection(cardPath));
+                    duplicateSelectionContainer.appendChild(cardElement);
                 }
-                return a.extension.localeCompare(b.extension);
             });
-
-
-            availableDuplicates.forEach(card => {
-                const cardDiv = document.createElement("div");
-                // Vérifie si la carte est actuellement sélectionnée comme doublon
-                const isSelected = data.selectedDuplicatesForShop.some(
-                    selCard => selCard.image === card.image && selCard.extension === card.extension
-                );
-                cardDiv.className = `card ${isSelected ? 'selected-duplicate' : ''}`;
-                cardDiv.style.backgroundImage = `url(${card.image})`;
-                 if (SHINY_CARDS_PATHS.includes(card.image)) {
-                    cardDiv.classList.add("shiny-card");
-                }
-                // Calcule le nombre de doublons disponibles pour cette carte (total - 1)
-                const countBadge = document.createElement("div");
-                countBadge.className = "count-badge";
-                countBadge.textContent = `x${card.count - 1}`;
-                cardDiv.appendChild(countBadge);
-
-                // Ajoute l'écouteur de clic pour sélectionner/désélectionner le doublon
-                cardDiv.addEventListener("click", () => {
-                    toggleDuplicateSelection(card);
-                });
-                duplicateSelectionContainer.appendChild(cardDiv);
-            });
-            updateBuyButtonState(); // Ensure this is called
         }
 
-        /**
-         * Ajoute ou retire une carte des doublons sélectionnés pour l'échange.
-         * @param {Object} cardToToggle - La carte à sélectionner/désélectionner (doit avoir image et extension).
-         */
-        function toggleDuplicateSelection(cardToToggle) {
-            const data = getData();
-            // Créer un objet simple avec juste les propriétés nécessaires pour l'identification
-            const identifyingCard = { image: cardToToggle.image, extension: cardToToggle.extension };
+        function toggleDuplicateSelection(cardToTogglePath) {
+            const currentSelectedCardElements = Array.from(duplicateSelectionContainer.children);
 
-            const index = data.selectedDuplicatesForShop.findIndex(
-                selCard => selCard.image === identifyingCard.image && selCard.extension === identifyingCard.extension
-            );
+            if (selectedDuplicates.includes(cardToTogglePath)) {
+                // Désélectionner : enlever la première occurrence de ce chemin
+                const index = selectedDuplicates.indexOf(cardToTogglePath);
+                if (index > -1) {
+                    selectedDuplicates.splice(index, 1);
+                }
+                // Retirer la classe de la première carte visuelle correspondant à ce chemin qui est sélectionnée
+                const selectedEl = currentSelectedCardElements.find(el => el.dataset.cardPath === cardToTogglePath && el.classList.contains('selected-duplicate'));
+                if (selectedEl) selectedEl.classList.remove("selected-duplicate");
 
-            if (index > -1) {
-                // La carte est déjà sélectionnée, la désélectionne
-                data.selectedDuplicatesForShop.splice(index, 1);
             } else {
-                // La carte n'est pas sélectionnée, l'ajoute si la limite n'est pas atteinte
-                if (data.selectedDuplicatesForShop.length < SHOP_TRADE_COST) {
-                    data.selectedDuplicatesForShop.push(identifyingCard); // Ajoute l'objet simplifié
+                // Sélectionner : si la limite n'est pas atteinte
+                if (selectedDuplicates.length < SHOP_TRADE_COST) {
+                    selectedDuplicates.push(cardToTogglePath);
+                    // Ajouter la classe à la première carte visuelle correspondant à ce chemin qui n'est PAS sélectionnée
+                    const unselectedEl = currentSelectedCardElements.find(el => el.dataset.cardPath === cardToTogglePath && !el.classList.contains('selected-duplicate'));
+                    if (unselectedEl) unselectedEl.classList.add("selected-duplicate");
                 } else {
-                    showMessage(`Vous ne pouvez sélectionner que ${SHOP_TRADE_COST} doublons différents.`);
+                    showMessage(`Vous ne pouvez sélectionner que ${SHOP_TRADE_COST} doublons.`);
                 }
             }
-            saveData(data);
-            renderDuplicatesForSelection(); // Rafraîchit l'affichage des doublons, qui appellera updateBuyButtonState()
+            duplicateSelectionCountSpan.textContent = selectedDuplicates.length;
+            updateBuyButtonState();
         }
 
-        /**
-         * Met à jour l'état du bouton d'achat de la boutique (activé/désactivé).
-         */
+
         function updateBuyButtonState() {
             const data = getData();
-            const isShopCardSelected = data.selectedShopCard !== null;
-            const hasEnoughDuplicates = data.selectedDuplicatesForShop.length === SHOP_TRADE_COST;
-            const canBuy = isShopCardSelected && hasEnoughDuplicates && !data.shopBoughtToday;
+            const shopCardSelected = selectedShopCardIndex !== -1;
+            const duplicatesSelectedCount = selectedDuplicates.length;
+            const canBuy = shopCardSelected && duplicatesSelectedCount === SHOP_TRADE_COST && !data.shopBoughtToday;
 
             buyShopCardBtn.disabled = !canBuy;
 
-            // Met à jour le texte du bouton si une carte est sélectionnée
-            if (isShopCardSelected && data.shopCards[data.selectedShopCard]) { // Ajout d'une vérification pour s'assurer que la carte est bien définie
-                const cardName = data.shopCards[data.selectedShopCard].image.split('/').pop().split('.')[0];
-                buyShopCardBtn.textContent = `Acheter "${cardName}" (${data.selectedDuplicatesForShop.length}/${SHOP_TRADE_COST} doublons)`;
-            } else {
-                buyShopCardBtn.textContent = `Acheter la carte sélectionnée (${data.selectedDuplicatesForShop.length}/${SHOP_TRADE_COST} doublons)`;
+            let buttonText = "Acheter la carte sélectionnée";
+            if (!shopCardSelected) {
+                buttonText = "Sélectionnez une carte à acheter";
+            } else if (duplicatesSelectedCount < SHOP_TRADE_COST) {
+                buttonText = `Sélectionnez ${SHOP_TRADE_COST - duplicatesSelectedCount} doublons de plus`;
+            } else if (data.shopBoughtToday) {
+                buttonText = "Achat quotidien effectué !";
             }
+            buyShopCardBtn.textContent = buttonText;
         }
 
-        /**
-         * Gère l'achat d'une carte dans la boutique.
-         */
         function buyShopCard() {
             const data = getData();
-
-            // Vérifications supplémentaires pour la sécurité
             if (data.shopBoughtToday) {
-                showMessage("Vous avez déjà effectué un achat dans la boutique aujourd'hui. Revenez demain !");
+                showMessage("Vous avez déjà effectué votre achat quotidien. Revenez demain !");
                 return;
             }
-            if (data.selectedShopCard === null) {
-                showMessage("Veuillez sélectionner une carte à acheter dans la boutique.");
+            if (selectedShopCardIndex === -1) {
+                showMessage("Veuillez sélectionner une carte à acheter.");
                 return;
             }
-            if (data.selectedDuplicatesForShop.length !== SHOP_TRADE_COST) {
-                showMessage(`Veuillez sélectionner ${SHOP_TRADE_COST} doublons différents pour l'échange.`);
+            if (selectedDuplicates.length !== SHOP_TRADE_COST) {
+                showMessage(`Veuillez sélectionner exactement ${SHOP_TRADE_COST} doublons différents à échanger.`);
                 return;
             }
 
-            const cardToBuy = data.shopCards[data.selectedShopCard];
+            const cardToBuyPath = data.shopCards[selectedShopCardIndex];
 
-            // Déduit les doublons de la collection
-            data.selectedDuplicatesForShop.forEach(selDup => {
-                const existingCard = data.collection.find(
-                    c => c.image === selDup.image && c.extension === selDup.extension
-                );
-                if (existingCard && existingCard.count > 1) {
-                    existingCard.count--; // Réduit le compte d'un exemplaire
-                } else {
-                    // Ce cas ne devrait pas arriver si la sélection est bien gérée,
-                    // mais c'est une sécurité.
-                    console.error("Doublon sélectionné introuvable ou pas en quantité suffisante:", selDup);
+            // Décrémenter les doublons utilisés
+            selectedDuplicates.forEach(duplicatePath => {
+                if (data.collection[duplicatePath] && data.collection[duplicatePath].count > 1) {
+                    data.collection[duplicatePath].count--;
+                    if (data.collection[duplicatePath].count === 0) {
+                        delete data.collection[duplicatePath]; // Supprime si le count tombe à 0 (ne devrait pas arriver avec >1)
+                    }
                 }
             });
 
-            // Ajoute la carte achetée à la collection
-            const existingBoughtCard = data.collection.find(
-                c => c.image === cardToBuy.image && c.extension === cardToBuy.extension
-            );
-            if (existingBoughtCard) {
-                existingBoughtCard.count++;
+            // Ajouter/Inc incrémenter la carte achetée
+            if (data.collection[cardToBuyPath]) {
+                data.collection[cardToBuyPath].count++;
             } else {
-                data.collection.push({ image: cardToBuy.image, extension: cardToBuy.extension, count: 1 });
+                data.collection[cardToBuyPath] = { count: 1, new: false }; // Pas "nouvelle" au sens du booster
             }
 
-            data.shopBoughtToday = true; // Marque l'achat du jour
-            data.selectedShopCard = null; // Réinitialise la sélection
-            data.selectedDuplicatesForShop = []; // Réinitialise les doublons sélectionnés
-
+            data.shopBoughtToday = true;
             saveData(data);
-            updateBoosterCount(); // Au cas où les boosters sont liés
-            updateCollection(); // Met à jour l'affichage de la collection
-            updateShop(); // Met à jour l'affichage de la boutique
-
-            // Affiche la carte achetée en grand
-            showMessage("Achat réussi !"); // Affiche un message de succès
-            // showFullCardOverlay(cardToBuy.image, existingBoughtCard ? existingBoughtCard.count : 1); // Ne pas ouvrir l'overlay auto après le message
+            showMessage("Achat réussi !");
+            updateShop();
+            updateCollection(); // La collection a changé (doublons dépensés, nouvelle carte acquise)
         }
 
-        /**
-         * Change l'onglet actif.
-         * @param {string} tabName - Le nom de l'onglet à activer ('booster', 'collection', 'shop').
-         */
-        function switchTab(tabName) {
-            const sections = document.querySelectorAll(".section");
-            sections.forEach(s => s.classList.remove("visible"));
+        // --- Fonctions de Navigation ---
+        let currentActiveSection = null;
+        let currentActiveTabBtn = null;
 
-            const tabs = document.querySelectorAll(".tab-btn");
-            tabs.forEach(tab => tab.classList.remove("active"));
+        function switchTab(tabName) {
+            if (currentActiveSection) {
+                currentActiveSection.classList.remove("active");
+            }
+            if (currentActiveTabBtn) {
+                currentActiveTabBtn.classList.remove("active");
+            }
+
+            let targetSection;
+            let targetTabBtn;
 
             switch (tabName) {
                 case "booster":
-                    document.getElementById("booster").classList.add("visible");
-                    // Active le bouton d'onglet "Booster"
-                    document.querySelector('.tab-btn[onclick="switchTab(\'booster\')"]').classList.add("active");
+                    targetSection = boosterSection;
+                    targetTabBtn = boosterTab;
+                    showLastBoosterSummary(); // Assurez-vous que le résumé du dernier booster est à jour
                     break;
                 case "collection":
-                    document.getElementById("collection").classList.add("visible");
-                    // Active le bouton d'onglet "Collection"
-                    document.querySelector('.tab-btn[onclick="switchTab(\'collection\')"]').classList.add("active");
-                    updateCollection(); // Mettre à jour la collection à chaque fois qu'on y va
+                    targetSection = collectionSection;
+                    targetTabBtn = collectionTab;
+                    updateCollection(); // Mettre à jour la collection lors de l'activation de l'onglet
                     break;
                 case "shop":
-                    shopSection.classList.add("visible");
-                    // Active le bouton d'onglet "Boutique"
-                    document.querySelector('.tab-btn[onclick="switchTab(\'shop\')"]').classList.add("active");
-                    updateShop(); // Mettre à jour la boutique à chaque fois qu'on y va
+                    targetSection = shopSection;
+                    targetTabBtn = shopTab;
+                    updateShop(); // Mettre à jour la boutique lors de l'activation de l'onglet
                     break;
+                case "data":
+                    targetSection = dataSection;
+                    targetTabBtn = dataTab;
+                    break;
+                default:
+                    return;
+            }
+
+            targetSection.classList.add("active");
+            targetTabBtn.classList.add("active");
+            currentActiveSection = targetSection;
+            currentActiveTabBtn = targetTabBtn;
+        }
+
+        // --- Fonctions Login/Logout ---
+        function login() {
+            const code = userCodeInput.value.trim();
+            if (code.length === 6 && /^\d+$/.test(code)) { // Valide 6 chiffres
+                currentCode = code;
+                loginSection.style.display = "none";
+                appContent.style.display = "block";
+                logoutBtn.style.display = "block";
+
+                // Initialiser l'application pour l'utilisateur
+                updateBoosterCount();
+                showLastBoosterSummary();
+                switchTab("booster"); // Afficher l'onglet booster par défaut
+            } else {
+                showMessage("Veuillez entrer un code à 6 chiffres.");
             }
         }
 
-        /**
-         * Gère la connexion de l'utilisateur avec le code à 6 chiffres.
-         * Reprise de la logique de index (4).html
-         */
-        function login() {
-            const code = codeInput.value.trim();
-            if (!/^\d{6}$/.test(code)) {
-                showMessage("Veuillez entrer un code à 6 chiffres valide.");
+        function logout() {
+            currentCode = null;
+            loginSection.style.display = "flex"; // Réafficher la section de connexion
+            appContent.style.display = "none";
+            logoutBtn.style.display = "none";
+
+            // Nettoyage de l'interface
+            boosterCountSpan.textContent = '0';
+            lastBoosterSummary.innerHTML = '';
+            document.getElementById("collection-grid").innerHTML = '';
+            dailyShopCardsContainer.innerHTML = '';
+            duplicateSelectionContainer.innerHTML = '';
+            shopMessage.textContent = '';
+            buyShopCardBtn.disabled = true;
+
+            // Réinitialiser les onglets
+            if (currentActiveTabBtn) {
+                currentActiveTabBtn.classList.remove("active");
+            }
+            boosterTab.classList.add("active"); // Remettre l'onglet Booster actif par défaut à la reconnexion
+        }
+
+        // --- Fonctions Import/Export de données ---
+        function exportData() {
+            if (!currentCode) {
+                showMessage("Connectez-vous d'abord avant d'exporter.");
                 return;
             }
-            currentCode = code;
-            document.getElementById("login").style.display = "none";
-            document.getElementById("app").style.display = "block";
-            document.getElementById("logout-btn").style.display = "inline-block"; // Afficher le bouton de déconnexion
-            updateBoosterCount();
-            showLastBoosterSummary();
-            updateCollection();
-            updateShop(); // S'assure que la boutique est à jour au login
-            switchTab('booster'); // Défaut sur l'onglet booster après connexion
+            const key = getStorageKey();
+            const data = localStorage.getItem(key);
+            if (!data) {
+                showMessage("Aucune donnée trouvée à exporter.");
+                return;
+            }
+
+            const blob = new Blob([data], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `souyette_data_${currentCode}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
-        /**
-         * Gère la déconnexion de l'utilisateur.
-         * Reprise de la logique de index (4).html
-         */
-        function logout() {
-            currentCode = "";
-            document.getElementById("login").style.display = "flex";
-            document.getElementById("app").style.display = "none";
-            document.getElementById("logout-btn").style.display = "none";
-            document.getElementById("codeInput").value = ""; // Vide le champ de code
-            // Nettoyage des éléments d'interface à la déconnexion
-            boosterResultContainer.innerHTML = "";
-            lastBoosterSummary.style.display = "none";
-            collectionExtensionsContainer.innerHTML = "";
-            dailyShopCardsContainer.innerHTML = "";
-            shopMessage.textContent = "";
-            duplicateSelectionContainer.innerHTML = "";
-            buyShopCardBtn.disabled = true;
-            buyShopCardBtn.textContent = `Acheter la carte sélectionnée (${0}/${SHOP_TRADE_COST} doublons)`;
+        function importDataFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (!currentCode) {
+                        showMessage("Connectez-vous d'abord avant d'importer.");
+                        return;
+                    }
+
+                    // Vérification minimale
+                    if (!imported.collection || !imported.date) {
+                        showMessage("Fichier invalide ou incomplet.");
+                        return;
+                    }
+
+                    localStorage.setItem(getStorageKey(), JSON.stringify(imported));
+                    showMessage("Importation réussie !");
+                    updateBoosterCount();
+                    updateCollection();
+                    updateShop();
+                    showLastBoosterSummary();
+                } catch (err) {
+                    showMessage("Erreur lors de l'importation. Fichier non valide.");
+                }
+            };
+            reader.readAsText(file);
         }
 
-        // --- Initialisation des écouteurs d'événements ---
-        // Le login et le logout ont des onclick directement dans l'HTML, donc pas besoin d'addEventListener ici.
-        // Les boutons booster ont aussi des onclick directement dans l'HTML.
+        // --- Écouteurs d'Événements ---
+        loginBtn.addEventListener("click", login);
+        userCodeInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") login();
+        });
+        logoutBtn.addEventListener("click", logout);
+
+        openOgBoosterBtn.addEventListener("click", () => openBooster("OG"));
+        openPrBoosterBtn.addEventListener("click", () => openBooster("PR"));
+        openTeBoosterBtn.addEventListener("click", () => openBooster("TE"));
+
+        boosterTab.addEventListener("click", () => switchTab("booster"));
+        collectionTab.addEventListener("click", () => switchTab("collection"));
+        shopTab.addEventListener("click", () => switchTab("shop"));
+        dataTab.addEventListener("click", () => switchTab("data"));
 
         buyShopCardBtn.addEventListener("click", buyShopCard);
 
-        // Écouteur pour le bouton OK de la boîte de message
-        messageBoxOkBtn.addEventListener("click", () => {
-            messageBoxOverlay.classList.remove("visible");
+        exportDataBtn.addEventListener("click", exportData);
+        importFileInput.addEventListener("change", (event) => {
+            if (event.target.files.length > 0) {
+                importDataFromFile(event.target.files[0]);
+            }
         });
 
-        // Initialisation de l'application (afficher la page de login au démarrage)
+        messageBoxOkBtn.addEventListener("click", () => {
+            messageBoxOverlay.classList.remove('show');
+        });
+
+        // Détection de glissement (swipe) sur la carte agrandie
+        expandedCardElement.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        expandedCardElement.addEventListener('touchmove', (e) => {
+            touchEndX = e.touches[0].clientX;
+            touchEndY = e.touches[0].clientY;
+        });
+
+        expandedCardElement.addEventListener('touchend', () => {
+            const dx = touchEndX - touchStartX;
+            const dy = Math.abs(touchEndY - touchStartY);
+
+            if (Math.abs(dx) > swipeThreshold && dy < swipeMaxY) {
+                if (dx > 0) { // Glissement vers la droite (précédent)
+                    navigateFullCard(-1);
+                } else { // Glissement vers la gauche (suivant)
+                    navigateFullCard(1);
+                }
+            }
+            touchStartX = 0;
+            touchEndX = 0;
+            touchStartY = 0;
+            touchEndY = 0;
+        });
+
+        // Simuler le glissement avec la souris pour le desktop
+        expandedCardElement.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseStartX = e.clientX;
+            expandedCardElement.style.cursor = 'grabbing';
+        });
+
+        expandedCardElement.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            mouseEndX = e.clientX;
+        });
+
+        expandedCardElement.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            expandedCardElement.style.cursor = 'grab'; // Remet le curseur normal
+            const dx = mouseEndX - mouseStartX;
+            if (Math.abs(dx) > swipeThreshold) {
+                if (dx > 0) { // Glissement vers la droite (précédent)
+                    navigateFullCard(-1);
+                } else { // Glissement vers la gauche (suivant)
+                    navigateFullCard(1);
+                }
+            }
+            mouseStartX = 0;
+            mouseEndX = 0;
+        });
+
+        expandedCardElement.addEventListener('mouseleave', () => {
+            if (isMouseDown) {
+                isMouseDown = false;
+                expandedCardElement.style.cursor = 'grab';
+                mouseStartX = 0;
+                mouseEndX = 0;
+            }
+        });
+
+
+        // Écouteur de clic sur l'overlay pour le fermer (si le clic n'est pas sur la carte elle-même)
+        fullCardOverlay.addEventListener("click", (event) => {
+            // Si l'élément cliqué est l'overlay lui-même (et non un enfant comme la carte)
+            if (event.target === fullCardOverlay) {
+                fullCardOverlay.style.display = "none";
+                // Nettoyer les classes d'animation résiduelles
+                expandedCardElement.classList.remove('slide-enter-from-right', 'slide-enter-from-left', 'slide-leave-to-left', 'slide-leave-to-right');
+            }
+        });
+
+        // Fermeture avec la touche Échap
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && fullCardOverlay.style.display === 'flex') {
+                fullCardOverlay.style.display = 'none';
+                expandedCardElement.classList.remove('slide-enter-from-right', 'slide-enter-from-left', 'slide-leave-to-left', 'slide-leave-to-right');
+            }
+        });
+
+
+        // --- Initialisation au chargement de la page ---
         window.onload = () => {
-            // S'assure que le mode login est visible au chargement de la page
+            // Afficher le formulaire de connexion au démarrage
             loginSection.style.display = "flex";
-            appSection.style.display = "none";
-            logoutBtn.style.display = "none";
+            appContent.style.display = "none";
+            logoutBtn.style.display = "none"; // S'assurer que le bouton de déconnexion est masqué
+
+            // Initialiser les onglets, mais ne pas appeler switchTab si pas connecté
+            boosterTab.classList.add("active"); // Garder l'onglet booster actif visuellement par défaut
         };
-function exportData() {
-    if (!currentCode) {
-        showMessage("Veuillez vous connecter avant d'exporter.");
-        return;
-    }
-    const key = getStorageKey();
-    const data = localStorage.getItem(key);
-    if (!data) {
-        showMessage("Aucune donnée trouvée à exporter.");
-        return;
-    }
-
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `souyette_data_${currentCode}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function importDataFromFile(file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        try {
-            const imported = JSON.parse(event.target.result);
-            if (!currentCode) {
-                showMessage("Connectez-vous d'abord avant d'importer.");
-                return;
-            }
-
-            // Vérification minimale
-            if (!imported.collection || !imported.date) {
-                showMessage("Fichier invalide ou incomplet.");
-                return;
-            }
-
-            localStorage.setItem(getStorageKey(), JSON.stringify(imported));
-            showMessage("Importation réussie !");
-            updateBoosterCount();
-            updateCollection();
-            updateShop();
-            showLastBoosterSummary();
-        } catch (err) {
-            showMessage("Erreur lors de l'importation. Fichier non valide.");
-        }
-    };
-    reader.readAsText(file);
-}
     </script>
 </body>
 </html>
