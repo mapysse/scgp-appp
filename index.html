@@ -999,12 +999,10 @@
          * @param {Array<CardData>} userCollection - La collection actuelle de l'utilisateur.
          * @returns {Array<CardData>} Les 5 cartes de la boutique pour le jour.
          */
-        function generateShopCardsInternal(userCollection) {
+          function generateShopCardsInternal(userCollection) {
             const allPossibleCards = [];
-            // Cette boucle itère sur 'OG' et 'PR'
             for (const ext in extensions) {
                 extensions[ext].forEach(image => {
-                    // Ajoute les cartes des deux extensions à la liste de toutes les cartes possibles
                     allPossibleCards.push({ image, extension: ext });
                 });
             }
@@ -1012,26 +1010,24 @@
             const unownedCards = allPossibleCards.filter(card =>
                 !userCollection.some(c => c.image === card.image && c.extension === card.extension)
             );
-            const ownedCards = allPossibleCards.filter(card =>
-                userCollection.some(c => c.image === card.image && c.extension === card.extension)
-            );
 
             const dailyCards = [];
+            const tempUnowned = [...unownedCards]; // Création d'une copie pour éviter de vider la liste originale
+
             for (let i = 0; i < SHOP_DAILY_CARD_COUNT; i++) {
                 let chosenCard;
                 const isNewChance = Math.random();
 
-                // 30% de chance d'obtenir une nouvelle carte si des nouvelles sont disponibles
-                if (isNewChance < SHOP_NEW_CARD_CHANCE && unownedCards.length > 0) {
-                    chosenCard = unownedCards[Math.floor(Math.random() * unownedCards.length)];
-                    // Pour éviter de proposer la même carte non possédée plusieurs fois dans la même sélection journalière
-                    unownedCards.splice(unownedCards.indexOf(chosenCard), 1);
+                // On vérifie s'il reste des cartes non possédées dans la liste temporaire
+                if (isNewChance < SHOP_NEW_CARD_CHANCE && tempUnowned.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * tempUnowned.length);
+                    chosenCard = tempUnowned[randomIndex];
+                    tempUnowned.splice(randomIndex, 1); // On retire cette carte de la copie pour ne pas la reproposer le même jour
                 } else {
-                    // Sinon, tire au hasard parmi toutes les cartes possibles
+                    // Sinon, on pioche simplement dans la liste complète des cartes
                     chosenCard = allPossibleCards[Math.floor(Math.random() * allPossibleCards.length)];
                 }
 
-                // Vérifie si la carte choisie est déjà possédée par l'utilisateur
                 const isOwned = userCollection.some(c => c.image === chosenCard.image && c.extension === chosenCard.extension);
                 dailyCards.push({ ...chosenCard, isNew: !isOwned, isSelectedForPurchase: false });
             }
